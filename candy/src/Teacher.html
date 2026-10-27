@@ -95,12 +95,12 @@ function login(){
       <span style="color:var(--muted);font-size:14px">학생으로 들어가 보기</span>${studentLinks()}</div></div>`;
   bindStudentLinks();
   const go=async()=>{ PW=document.getElementById('pw').value;
-    try{ data=await api('teacherData',PW); render(); timer=setInterval(refresh,5000); }
+    try{ data=await api('teacherData',PW); if(!data) throw new Error('진행 기록을 불러오지 못했어요. 잠시 뒤 다시 눌러 주세요.'); render(); timer=setInterval(refresh,5000); }
     catch(e){ document.getElementById('err').textContent=e.message||'비밀번호를 확인해 주세요'; } };
   document.getElementById('go').onclick=go;
   document.getElementById('pw').onkeydown=e=>{ if(e.key==='Enter') go(); };
 }
-async function refresh(){ try{ data=await api('teacherData',PW); render(); }catch(e){} }
+async function refresh(){ try{ const d=await api('teacherData',PW); if(d){ data=d; render(); } }catch(e){} }
 
 function ago(ms,now){ if(!ms) return '-'; const s=Math.round((now-ms)/1000); if(s<60) return s+'초 전'; if(s<3600) return Math.floor(s/60)+'분 전'; return Math.floor(s/3600)+'시간 전'; }
 function mins(a,b){ if(!a||!b) return ''; return Math.round((b-a)/60000)+'분'; }
