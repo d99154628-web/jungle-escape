@@ -17,6 +17,7 @@ h1{color:#fff4e0;margin:0;font-size:28px}
 .bar .sp{flex:1}
 .btn{background:var(--caramel);color:#fff;font-size:16px;padding:9px 16px;border-radius:12px;box-shadow:0 4px 0 #a86a17}
 .btn.ghost{background:#efe0c4;color:var(--ink);box-shadow:0 4px 0 #cdb58f}
+.btn{text-decoration:none;display:inline-block;text-align:center}
 .btn.red{background:var(--bad);box-shadow:0 4px 0 #8f2b20}
 select{font-family:inherit;font-size:16px;padding:8px;border-radius:10px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
@@ -59,6 +60,7 @@ const HAS_GAS = typeof google !== 'undefined' && google.script && google.script.
 function api(fn, ...args){
   if (HAS_GAS) return new Promise((res,rej)=>google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn](...args));
   let db={}; try{db=JSON.parse(localStorage.getItem('candy_mock')||'{}');}catch(e){}
+  if (fn==='getAppUrl') return Promise.resolve('Index.html');
   if (args[0]!=='1234') return Promise.reject(new Error('비밀번호가 맞지 않아요.'));
   if (fn==='teacherData') return Promise.resolve({now:Date.now(),students:Object.values(db),sheetUrl:'#'});
   if (fn==='resetStudent'){ delete db[args[1]]; localStorage.setItem('candy_mock',JSON.stringify(db)); return Promise.resolve(true); }
@@ -68,14 +70,30 @@ const ROOMS=['','사탕 병 찬장','마녀의 수정구','메아리 우물','�
 const PARTS=['','Words','Fun Talk 1','Listen and Do','Practice 1','Play 1','Check It','HABITS'];
 const LET=['','H','A','B','I','T','S','🚪'];
 const HAB={teeth:['🪥','이','day'],water:['💧','물','day'],hands:['🧼','손','day'],veg:['🥦','채소','day'],library:['📚','도서관','week'],exercise:['🏃','운동','week']};
-let PW='', timer=null, data=null, filter='all', opened={};
+let PW='', timer=null, data=null, filter='all', opened={}, APP_URL='';
+api('getAppUrl').then(u=>{ APP_URL=u||''; document.querySelectorAll('[data-student]').forEach(a=>{ a.href=APP_URL; a.hidden=!APP_URL; }); }).catch(()=>{});
+function studentLinks(){
+  return `<a class="btn" data-student href="${APP_URL||'#'}" target="_blank" rel="noopener" ${APP_URL?'':'hidden'}>🎒 학생 화면으로 들어가기</a>
+    <button class="btn ghost" data-copyurl type="button">학생 주소 복사</button>`;
+}
+function bindStudentLinks(){
+  document.querySelectorAll('[data-copyurl]').forEach(b=>b.onclick=()=>{
+    if (!APP_URL) return;
+    const done=()=>{ b.textContent='복사했어요'; setTimeout(()=>b.textContent='학생 주소 복사',1500); };
+    const fb=()=>{ const t=document.createElement('textarea'); t.value=APP_URL; document.body.appendChild(t); t.select(); try{document.execCommand('copy');}catch(e){} t.remove(); done(); };
+    try{ navigator.clipboard.writeText(APP_URL).then(done, fb); }catch(e){ fb(); }
+  });
+}
 const app=document.getElementById('app');
 
 function login(){
   app.innerHTML=`<div class="login"><div style="font-size:60px">🧙‍♀️🔮</div><h2>교사 화면</h2>
     <p style="color:var(--muted)">과자집 탈출 · 학생 진행 상황</p>
     <input type="password" id="pw" placeholder="비밀번호"><button class="btn" id="go" style="width:100%;font-size:20px">들어가기</button>
-    <p id="err" style="color:var(--bad)"></p></div>`;
+    <p id="err" style="color:var(--bad)"></p>
+    <div style="border-top:2px dashed #e6d1ad;margin-top:16px;padding-top:16px;display:flex;flex-direction:column;gap:10px">
+      <span style="color:var(--muted);font-size:14px">학생으로 들어가 보기</span>${studentLinks()}</div></div>`;
+  bindStudentLinks();
   const go=async()=>{ PW=document.getElementById('pw').value;
     try{ data=await api('teacherData',PW); render(); timer=setInterval(refresh,5000); }
     catch(e){ document.getElementById('err').textContent=e.message||'비밀번호를 확인해 주세요'; } };
@@ -103,6 +121,7 @@ function render(){
   app.innerHTML=`
   <div class="bar"><h1>🏚️ 과자집 탈출 · 교사 화면</h1><span class="sp"></span>
     <select id="cf"><option value="all">전체 반</option>${classes.map(c=>`<option value="${c}" ${String(c)===String(filter)?'selected':''}>${c}반</option>`).join('')}</select>
+    ${studentLinks()}
     <button class="btn ghost" id="rf">🔄 새로고침</button>
     ${data.sheetUrl&&data.sheetUrl!=='#'?`<button class="btn ghost" onclick="window.open('${data.sheetUrl}','_blank')">📊 기록 시트</button>`:''}
     <button class="btn red" id="ra">전체 초기화</button></div>
@@ -118,6 +137,7 @@ function render(){
       <div class="cnt">👤 ${roomNow[i]}</div><div style="font-size:12px">🍬 ${roomWrong[i]}</div><div class="bw"><i style="width:${roomWrong[i]/maxW*100}%"></i></div></div>`).join('')}</div></div>
   ${list.length?`<div class="grid">${list.map(s=>card(s,now)).join('')}</div>`:`<div class="empty">아직 들어온 학생이 없어요.<br>학생들에게 배포 주소를 나눠 주세요.</div>`}`;
 
+  bindStudentLinks();
   document.getElementById('cf').onchange=e=>{filter=e.target.value;render();};
   document.getElementById('rf').onclick=refresh;
   document.getElementById('ra').onclick=async()=>{ if(confirm('모든 학생의 진행 기록을 지울까요? (답안기록 시트는 남아요)')){ await api('resetAll',PW); refresh(); } };
