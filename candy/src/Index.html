@@ -186,6 +186,7 @@ function api(fn, ...args){
   return Promise.resolve(mockApi(fn, args));
 }
 function mockApi(fn, args){
+  if (fn==='getAppUrl') return 'Index.html';
   let db = {}; try{ db = JSON.parse(localStorage.getItem('candy_mock')||'{}'); }catch(e){}
   if (fn==='studentLogin'){
     const [cls,num,name,hero] = args; const k = cls+'-'+num;
@@ -418,11 +419,14 @@ function renderLogin(){
       <div class="center"><button class="btn pink" id="go">🔊 소리를 켜고 시작하기</button></div>
       <p class="center" style="color:#8a6b4f;font-size:15px;margin:12px 0 0">이어폰을 끼고 시작하세요. 중간에 나가도 같은 반·번호로 들어오면 이어서 할 수 있어요.</p>
     </div>
+    <p class="center" style="margin:14px 0 0"><a id="toTeacher" hidden target="_blank" rel="noopener"
+      style="color:#bfa98a;font-size:14px;text-decoration:underline">🔒 선생님 화면</a></p>
   </div>`;
   document.querySelectorAll('.heroes button').forEach(b=>b.onclick=()=>{
     document.querySelectorAll('.heroes button').forEach(x=>x.classList.remove('sel'));
     b.classList.add('sel'); S.hero = b.dataset.h;
   });
+  api('getAppUrl').then(u=>{ const a=$('#toTeacher'); if (u && a){ a.href = HAS_GAS ? u+'?mode=teacher' : 'Teacher.html'; a.hidden=false; } }).catch(()=>{});
   $('#go').onclick = async ()=>{
     const cls = $('#cls').value.trim(), num = $('#num').value.trim(), name = $('#name').value.trim();
     if (!cls || !num || !name){ toast('반, 번호, 이름을 모두 써 주세요','bad'); return; }
