@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>교사 화면 · 과자집 탈출</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--night:#16241f;--paper:#fdf0d8;--ink:#3b2416;--ginger:#9a5a2b;--caramel:#d9922f;--candy:#ff7fa8;--ok:#2e9e63;--bad:#d84a3a;--muted:#8a6b4f}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Jua',sans-serif;background:var(--night);color:var(--ink)}
+button{font-family:inherit;cursor:pointer;border:none}
+.wrap{max-width:1280px;margin:0 auto;padding:16px}
+h1{color:#fff4e0;margin:0;font-size:28px}
+.bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.bar .sp{flex:1}
+.btn{background:var(--caramel);color:#fff;font-size:16px;padding:9px 16px;border-radius:12px;box-shadow:0 4px 0 #a86a17}
+.btn.ghost{background:#efe0c4;color:var(--ink);box-shadow:0 4px 0 #cdb58f}
+.btn.red{background:var(--bad);box-shadow:0 4px 0 #8f2b20}
+select{font-family:inherit;font-size:16px;padding:8px;border-radius:10px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.stat{background:var(--paper);border-radius:18px;padding:12px 16px}
+.stat b{display:block;font-family:'Fredoka';font-size:34px;color:var(--ginger)}
+.panel{background:var(--paper);border-radius:18px;padding:14px 16px;margin-bottom:14px}
+.rooms{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.rm{background:#fff;border-radius:12px;padding:8px;text-align:center;font-size:14px}
+.rm .cnt{font-family:'Fredoka';font-size:22px}
+.rm .bw{height:8px;background:#f3e6cf;border-radius:4px;margin-top:4px;overflow:hidden}
+.rm .bw i{display:block;height:100%;background:var(--bad)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.st{background:var(--paper);border-radius:16px;padding:12px;border:3px solid transparent;cursor:pointer;position:relative}
+.st.esc{border-color:var(--ok);background:#e5f8ee}
+.st.idle{opacity:.6}
+.st.help{border-color:var(--bad)}
+.st .nm{font-size:19px}
+.st .nm small{color:var(--muted);font-size:14px}
+.dots{display:flex;gap:4px;margin:8px 0}
+.dot{flex:1;height:22px;border-radius:6px;background:#e9d8bb;display:grid;place-items:center;font-family:'Fredoka';font-size:13px;color:#b99a7a}
+.dot.d{background:var(--caramel);color:#fff}
+.dot.n{background:var(--candy);color:#fff;animation:p 1.3s infinite}
+@keyframes p{50%{opacity:.55}}
+.meta{display:flex;justify-content:space-between;font-size:14px;color:var(--muted)}
+.badge{position:absolute;top:10px;right:10px;font-size:13px;padding:2px 8px;border-radius:999px;background:#fff}
+.detail{display:none;margin-top:8px;background:#fff;border-radius:12px;padding:8px;font-size:14px}
+.st.open .detail{display:block}
+.detail table{width:100%;border-collapse:collapse}
+.detail td{padding:3px 4px;border-bottom:1px solid #f0e3cc}
+.login{max-width:380px;margin:90px auto;background:var(--paper);border-radius:22px;padding:24px;text-align:center}
+.login input{font-family:inherit;font-size:22px;padding:10px;border-radius:12px;border:3px solid #e8c99a;width:100%;margin:12px 0}
+.empty{color:#d8c4a5;text-align:center;padding:40px;font-size:20px}
+@media (max-width:700px){.rooms{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+const HAS_GAS = typeof google !== 'undefined' && google.script && google.script.run;
+function api(fn, ...args){
+  if (HAS_GAS) return new Promise((res,rej)=>google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn](...args));
+  let db={}; try{db=JSON.parse(localStorage.getItem('candy_mock')||'{}');}catch(e){}
+  if (args[0]!=='1234') return Promise.reject(new Error('비밀번호가 맞지 않아요.'));
+  if (fn==='teacherData') return Promise.resolve({now:Date.now(),students:Object.values(db),sheetUrl:'#'});
+  if (fn==='resetStudent'){ delete db[args[1]]; localStorage.setItem('candy_mock',JSON.stringify(db)); return Promise.resolve(true); }
+  if (fn==='resetAll'){ localStorage.setItem('candy_mock','{}'); return Promise.resolve(true); }
+}
+const ROOMS=['','사탕 병 찬장','마녀의 수정구','메아리 우물','마녀의 주문서','마녀와 습관 내기','오븐 앞 시험','큰 문'];
+const PARTS=['','Words','Fun Talk 1','Listen and Do','Practice 1','Play 1','Check It','HABITS'];
+const LET=['','H','A','B','I','T','S','🚪'];
+const HAB={teeth:['🪥','이','day'],water:['💧','물','day'],hands:['🧼','손','day'],veg:['🥦','채소','day'],library:['📚','도서관','week'],exercise:['🏃','운동','week']};
+let PW='', timer=null, data=null, filter='all', opened={};
+const app=document.getElementById('app');
+
+function login(){
+  app.innerHTML=`<div class="login"><div style="font-size:60px">🧙‍♀️🔮</div><h2>교사 화면</h2>
+    <p style="color:var(--muted)">과자집 탈출 · 학생 진행 상황</p>
+    <input type="password" id="pw" placeholder="비밀번호"><button class="btn" id="go" style="width:100%;font-size:20px">들어가기</button>
+    <p id="err" style="color:var(--bad)"></p></div>`;
+  const go=async()=>{ PW=document.getElementById('pw').value;
+    try{ data=await api('teacherData',PW); render(); timer=setInterval(refresh,5000); }
+    catch(e){ document.getElementById('err').textContent=e.message||'비밀번호를 확인해 주세요'; } };
+  document.getElementById('go').onclick=go;
+  document.getElementById('pw').onkeydown=e=>{ if(e.key==='Enter') go(); };
+}
+async function refresh(){ try{ data=await api('teacherData',PW); render(); }catch(e){} }
+
+function ago(ms,now){ if(!ms) return '-'; const s=Math.round((now-ms)/1000); if(s<60) return s+'초 전'; if(s<3600) return Math.floor(s/60)+'분 전'; return Math.floor(s/3600)+'시간 전'; }
+function mins(a,b){ if(!a||!b) return ''; return Math.round((b-a)/60000)+'분'; }
+
+function render(){
+  const now=data.now; let list=data.students.slice();
+  const classes=[...new Set(list.map(s=>s['반']))].sort((a,b)=>a-b);
+  if (filter!=='all') list=list.filter(s=>String(s['반'])===String(filter));
+  list.sort((a,b)=>(a['반']-b['반'])||(a['번호']-b['번호']));
+  const esc=list.filter(s=>s['상태']==='탈출 성공').length;
+  const active=list.filter(s=>s['상태']!=='탈출 성공' && now-s['마지막활동']<180000).length;
+  const avgWrong=list.length?(list.reduce((t,s)=>t+(+s['오답']||0),0)/list.length).toFixed(1):0;
+  const roomWrong=[0,0,0,0,0,0,0,0], roomNow=[0,0,0,0,0,0,0,0];
+  list.forEach(s=>{ const w=s['방별오답']||{}; Object.keys(w).forEach(k=>roomWrong[+k]+=+w[k]); if(s['상태']!=='탈출 성공') roomNow[+s['현재방']||1]++; });
+  const maxW=Math.max(1,...roomWrong);
+  const hardest=roomWrong.indexOf(Math.max(...roomWrong));
+
+  app.innerHTML=`
+  <div class="bar"><h1>🏚️ 과자집 탈출 · 교사 화면</h1><span class="sp"></span>
+    <select id="cf"><option value="all">전체 반</option>${classes.map(c=>`<option value="${c}" ${String(c)===String(filter)?'selected':''}>${c}반</option>`).join('')}</select>
+    <button class="btn ghost" id="rf">🔄 새로고침</button>
+    ${data.sheetUrl&&data.sheetUrl!=='#'?`<button class="btn ghost" onclick="window.open('${data.sheetUrl}','_blank')">📊 기록 시트</button>`:''}
+    <button class="btn red" id="ra">전체 초기화</button></div>
+  <div class="stats">
+    <div class="stat">접속 학생<b>${list.length}</b></div>
+    <div class="stat">탈출 성공 🎉<b>${esc}</b></div>
+    <div class="stat">지금 탐험 중<b>${active}</b></div>
+    <div class="stat">평균 실수<b>${avgWrong}</b></div>
+    <div class="stat">가장 어려운 방<b style="font-size:20px;margin-top:8px">${roomWrong[hardest]?hardest+'. '+ROOMS[hardest]:'-'}</b></div>
+  </div>
+  <div class="panel"><div style="margin-bottom:8px">방별 현황 <small style="color:var(--muted)">(지금 있는 학생 수 · 누적 실수)</small></div>
+    <div class="rooms">${[1,2,3,4,5,6,7].map(i=>`<div class="rm"><div>${i}. ${ROOMS[i]}</div><div style="color:var(--muted);font-size:12px">${PARTS[i]}</div>
+      <div class="cnt">👤 ${roomNow[i]}</div><div style="font-size:12px">🍬 ${roomWrong[i]}</div><div class="bw"><i style="width:${roomWrong[i]/maxW*100}%"></i></div></div>`).join('')}</div></div>
+  ${list.length?`<div class="grid">${list.map(s=>card(s,now)).join('')}</div>`:`<div class="empty">아직 들어온 학생이 없어요.<br>학생들에게 배포 주소를 나눠 주세요.</div>`}`;
+
+  document.getElementById('cf').onchange=e=>{filter=e.target.value;render();};
+  document.getElementById('rf').onclick=refresh;
+  document.getElementById('ra').onclick=async()=>{ if(confirm('모든 학생의 진행 기록을 지울까요? (답안기록 시트는 남아요)')){ await api('resetAll',PW); refresh(); } };
+  document.querySelectorAll('.st').forEach(el=>el.onclick=e=>{
+    if (e.target.dataset.reset){ e.stopPropagation(); if(confirm(el.dataset.name+' 학생 기록을 지우고 처음부터 하게 할까요?')) api('resetStudent',PW,e.target.dataset.reset).then(refresh); return; }
+    opened[el.dataset.key]=!opened[el.dataset.key]; el.classList.toggle('open'); });
+}
+
+function card(s,now){
+  const escd=s['상태']==='탈출 성공', room=+s['현재방']||1;
+  const idle=!escd && now-s['마지막활동']>180000;
+  const w=s['방별오답']||{}, curWrong=+(w[room]||0);
+  const help=!escd && curWrong>=5;
+  let dots=''; for(let i=1;i<=7;i++){ const c=escd||i<room?'d':(i===room?'n':''); dots+=`<div class="dot ${c}" title="${ROOMS[i]}">${escd||i<room?LET[i]:i}</div>`; }
+  const me=s['내습관']||{}, wi=s['마녀습관']||{};
+  const habitRows=Object.keys(HAB).filter(h=>me[h]).map(h=>`<tr><td>${HAB[h][0]} ${HAB[h][1]}</td><td>${HAB[h][2]==='day'?'하루':'주'} ${me[h]}회</td><td style="color:var(--muted)">마녀 ${wi[h]&&wi[h].n?wi[h].n:'-'}${wi[h]&&me[h]===wi[h].n?' ⭐':''}</td></tr>`).join('');
+  return `<div class="st ${escd?'esc':''} ${idle?'idle':''} ${help?'help':''} ${opened[s.key]?'open':''}" data-key="${s.key}" data-name="${s['이름']}">
+    <span class="badge">${escd?'🎉 탈출':help?'🆘 도움 필요':idle?'💤 멈춤':'🔎 '+room+'번 방'}</span>
+    <div class="nm">${s['주인공']==='hansel'?'👦':'👧'} ${s['이름']} <small>${s['반']}반 ${s['번호']}번</small></div>
+    <div class="dots">${dots}</div>
+    <div class="meta"><span>⭐ ${s['정답']||0} · 🍬 ${s['오답']||0}</span><span>${escd?'⏱ '+mins(s['시작'],s['탈출시각']):ago(s['마지막활동'],now)}</span></div>
+    <div class="detail">
+      <div>방별 실수: ${[1,2,3,4,5,6,7].map(i=>`${i}번 ${w[i]||0}`).join(' · ')}</div>
+      ${habitRows?`<div style="margin-top:6px">Play 1 내 습관</div><table>${habitRows}</table>`:''}
+      <div style="text-align:right;margin-top:6px"><button class="btn ghost" style="font-size:13px;padding:4px 10px" data-reset="${s.key}">처음부터 다시</button></div>
+    </div></div>`;
+}
+login();
+</script>
+</body>
+</html>
