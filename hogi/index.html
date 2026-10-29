@@ -50,6 +50,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--berry);outline-
 .tab b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--line);font-size:13px;font-family:var(--f-en)}
 .tab[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
 .tab[aria-selected="true"] b{background:var(--honey);color:var(--ink)}
+.printLink{text-decoration:none;color:var(--ink);background:var(--honey-soft);border-color:var(--honey)}
 
 .view{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
 
@@ -214,6 +215,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--berry);outline-
       <button class="tab" role="tab" data-tab="memo" aria-selected="false"><b>2</b>대사 외우기</button>
       <button class="tab" role="tab" data-tab="role" aria-selected="false"><b>3</b>역할극</button>
       <button class="tab" role="tab" data-tab="post" aria-selected="false"><b>4</b>사후 활동</button>
+      <a class="tab printLink" href="worksheet.html" target="_blank" rel="noopener">🖨️ 학습지 인쇄</a>
     </nav>
   </header>
 
