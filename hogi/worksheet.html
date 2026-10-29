@@ -338,7 +338,7 @@ function drawColor(){
   const box=document.getElementById("colorArt");box.innerHTML=svg;lineArt(box.querySelector("svg"));
   // 선 그림 변환 뒤 하늘/땅 등 배경 요소의 선 굵기 되돌리기
 }
-drawScenes();drawColor();
+drawScenes();document.getElementById("colorArt").innerHTML='<img src="img/color_party.png" alt="생일 파티 색칠 그림" style="display:block;width:100%;height:auto">';
 
 document.getElementById("mode").onclick=e=>{const b=e.target.closest("button");if(!b)return;MODE=b.dataset.m;document.querySelectorAll("#mode button").forEach(x=>x.setAttribute("aria-pressed",x===b));drawScenes()};
 document.getElementById("pages").onclick=e=>{const b=e.target.closest("button");if(!b)return;const p=b.dataset.p;document.querySelectorAll("#pages button").forEach(x=>x.setAttribute("aria-pressed",x===b));
