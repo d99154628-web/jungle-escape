@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>보라 대왕 퍼시 학습지</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Andika:wght@400;700&family=Fredoka:wght@500;600&display=swap">
+<style>
+/* A4 두 장: 1쪽 대본 쓰기, 2쪽 색칠하고 바꿔 쓰기 */
+:root{
+  --ink:#3a2650;--muted:#7d6a8c;--line:#e4d6ee;--paper:#fdfaff;--berry:#8a4fd1;--berry-soft:#f1e6fb;
+  --moss:#2f9a8a;--honey:#f2b84b;--honey-soft:#fde8f3;
+  --f-d:"Jua","Gowun Dodum",system-ui,sans-serif;--f-b:"Gowun Dodum","Malgun Gothic",system-ui,sans-serif;--f-w:"Andika","Fredoka","Trebuchet MS",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:#ddd2e8;color:var(--ink);font-family:var(--f-b)}
+.tools{position:sticky;top:0;z-index:5;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center;padding:10px 16px;background:rgba(255,252,255,.96);box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.tools .t{font-family:var(--f-d);font-size:20px;margin-right:6px}
+.seg{display:flex;border:2px solid var(--ink);border-radius:12px;overflow:hidden}
+.seg button{border:0;background:#fff;padding:8px 14px;font-family:var(--f-d);font-size:17px;cursor:pointer;color:var(--ink);border-right:2px solid var(--ink)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.btn{border:2px solid var(--ink);background:#fff;color:var(--ink);border-radius:12px;padding:8px 16px;font-family:var(--f-d);font-size:17px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn.main{background:var(--berry);border-color:var(--berry);color:#fff}
+.note{font-size:14px;color:var(--muted);width:100%;text-align:center}
+
+.sheets{display:flex;flex-direction:column;align-items:center;gap:20px;padding:20px 12px 40px}
+.page{width:210mm;min-height:297mm;background:#fff;padding:11mm 12mm;box-shadow:0 4px 18px rgba(0,0,0,.15);display:flex;flex-direction:column;gap:3.6mm;position:relative;overflow:hidden}
+
+.head{display:flex;align-items:center;gap:4mm;border-bottom:.6mm dashed var(--line);padding-bottom:3mm}
+.head img{height:19mm;width:auto}
+.head h1{font-family:var(--f-d);font-weight:400;font-size:9mm;margin:0;line-height:1}
+.head h1 small{display:block;font-family:var(--f-b);font-size:3.4mm;color:var(--muted);margin-top:1.2mm}
+.who{margin-left:auto;font-size:3.8mm;line-height:2;text-align:right;white-space:nowrap}
+.who span{display:inline-block;border-bottom:.3mm solid var(--ink);min-width:9mm;margin:0 1mm}
+.who span.nm{min-width:28mm}
+.task{display:flex;align-items:center;gap:2.5mm;font-family:var(--f-d);font-size:5mm}
+.task b{display:inline-grid;place-items:center;width:7mm;height:7mm;border-radius:50%;background:var(--berry);color:#fff;font-weight:400;font-size:4mm;flex:none}
+.task em{font-style:normal;font-family:var(--f-b);font-size:3.4mm;color:var(--muted)}
+
+.scene{display:grid;grid-template-columns:38mm 1fr;gap:3mm;border:.4mm solid var(--line);border-radius:4mm;padding:2.2mm;background:var(--paper)}
+.thumb{display:flex;flex-direction:column;gap:1mm}
+.thumb img{width:38mm;height:21mm;object-fit:cover;border-radius:2.5mm;display:block}
+.thumb .st{font-family:var(--f-d);font-size:3.2mm;line-height:1.25}
+.thumb .st i{font-style:normal;color:var(--berry)}
+.rows{display:flex;flex-direction:column;gap:2.6mm;min-width:0}
+.row{display:grid;grid-template-columns:12mm 1fr;gap:2mm;align-items:center}
+.av{width:12mm;height:12mm;display:grid;place-items:center}
+.av img{max-width:100%;max-height:100%}
+.lineBox{min-width:0}
+.ko{font-family:var(--f-d);font-size:3.3mm;color:var(--muted);display:flex;gap:1.5mm;align-items:center}
+.ko .nm{background:var(--honey-soft);color:var(--ink);border-radius:9px;padding:0 1.6mm}
+.guide{display:block;width:100%}
+.bank{display:flex;flex-wrap:wrap;gap:2mm;align-items:center;border:.4mm dashed var(--berry);border-radius:3mm;padding:2mm 3mm;font-family:var(--f-w);font-size:4.6mm}
+.bank span{background:var(--berry-soft);border-radius:2mm;padding:.3mm 2mm}
+.bank .lb{background:none;font-family:var(--f-d);font-size:3.6mm;color:var(--berry);padding:0}
+.foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:3.4mm;color:var(--muted)}
+.stars{font-size:5mm;letter-spacing:1mm;color:var(--line);-webkit-text-stroke:.25mm var(--honey)}
+
+.duo{display:grid;grid-template-columns:1.25fr 1fr;gap:4mm;align-items:stretch}
+.box{border:.4mm solid var(--line);border-radius:4mm;padding:2.5mm 3mm;background:var(--paper);display:flex;flex-direction:column;gap:2mm;min-width:0}
+.box img.art{width:100%;height:auto;display:block;border-radius:3mm;border:.4mm solid var(--line);background:#fff}
+.box .cap{font-family:var(--f-d);font-size:3.6mm;line-height:1.35}
+.talk{display:grid;grid-template-columns:auto 1fr;gap:1.4mm 2.5mm;align-items:center}
+.talk .who2{font-family:var(--f-d);font-size:3.4mm;color:var(--muted);white-space:nowrap}
+.colors{display:flex;flex-wrap:wrap;gap:1.6mm;font-family:var(--f-w);font-size:3.9mm}
+.colors span{border:.3mm solid var(--line);border-radius:2mm;padding:.2mm 1.6mm;display:inline-flex;align-items:center;gap:1mm;background:#fff}
+.colors i{display:inline-block;width:3mm;height:3mm;border-radius:50%;border:.25mm solid var(--ink)}
+.roles{display:flex;gap:3mm;flex-wrap:wrap;font-family:var(--f-d);font-size:4mm}
+.roles span{border:.35mm solid var(--line);border-radius:99px;padding:.6mm 3mm;background:#fff}
+.evalT{width:100%;border-collapse:collapse;font-size:3.8mm}
+.evalT td,.evalT th{border-bottom:.3mm solid var(--line);padding:1.4mm 2mm;text-align:left}
+.evalT th{font-family:var(--f-d);font-weight:400;color:var(--muted)}
+.evalT td:last-child,.evalT th:last-child{text-align:right;white-space:nowrap}
+
+@page{size:A4;margin:0}
+@media print{
+  body{background:#fff}
+  .tools{display:none}
+  .sheets{padding:0;gap:0}
+  .page{box-shadow:none;break-after:page;width:210mm;height:297mm;min-height:0}
+  .page:last-child{break-after:auto}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="tools">
+  <span class="t">학습지 인쇄</span>
+  <div class="seg" id="mode">
+    <button data-m="trace" aria-pressed="true">따라 쓰기 (흐린 글씨)</button>
+    <button data-m="blank" aria-pressed="false">스스로 쓰기 (빈칸)</button>
+  </div>
+  <div class="seg" id="pages">
+    <button data-p="both" aria-pressed="true">두 장 모두</button>
+    <button data-p="script" aria-pressed="false">대본 쓰기만</button>
+    <button data-p="color" aria-pressed="false">색칠·바꿔 쓰기만</button>
+  </div>
+  <button class="btn main" id="printBtn">🖨️ 인쇄하기</button>
+  <a class="btn" href="./">← 수업 화면</a>
+  <div class="note">A4 세로로 인쇄돼요. 인쇄 창에서 '배경 그래픽'을 켜면 색이 함께 나와요. 흑백으로 뽑아도 괜찮아요.</div>
+</div>
+
+<div class="sheets">
+  <!-- 1쪽 대본 쓰기 -->
+  <section class="page" id="pScript">
+    <div class="head">
+      <img src="img/percy_proud.webp" alt="">
+      <h1>보라 대왕 퍼시<small>Lesson 9 What Color Is It? · 대본 쓰기</small></h1>
+      <div class="who">3학년 <span></span>반 <span></span>번<br>이름 <span class="nm"></span></div>
+    </div>
+    <div class="task"><b>1</b>우리말 뜻을 보고, 인물들의 영어 대사를 써 봐요. <em id="modeHint">흐린 글씨를 따라 써요.</em></div>
+    <div id="scenes" style="display:flex;flex-direction:column;gap:2.2mm"></div>
+    <div class="bank" id="bank" hidden></div>
+    <div class="foot"><span>바르게 썼나요?</span><span class="stars">★★★</span></div>
+  </section>
+
+  <!-- 2쪽 색칠하고 바꿔 쓰기 -->
+  <section class="page" id="pColor">
+    <div class="head">
+      <img src="img/percy_happy.webp" alt="">
+      <h1>보라 왕국의 색깔 이야기<small>Lesson 9 What Color Is It? · 색칠하고 바꿔 써요</small></h1>
+      <div class="who">3학년 <span></span>반 <span></span>번<br>이름 <span class="nm"></span></div>
+    </div>
+    <div class="task"><b>2</b>우체통은 무슨 색깔이었나요? 이야기 속 색깔로 칠하고 대화를 완성해요.</div>
+    <div class="duo">
+      <div class="box"><img class="art" src="img/coloring_mailbox.webp" alt="퍼시 대왕과 우체통 색칠 그림"></div>
+      <div class="box" style="justify-content:center">
+        <div class="cap">우체통 앞에서 퍼시 대왕과 신하 2가 나눈 말</div>
+        <div class="talk">
+          <span class="who2">퍼시 대왕</span><svg class="guide" data-text="What color is it?" data-s="3.6"></svg>
+          <span class="who2">신하 2</span><svg class="guide" data-text="It’s _______." data-s="3.6" data-solid="1"></svg>
+          <span class="who2">퍼시 대왕</span><svg class="guide" data-text="I like purple!" data-s="3.6"></svg>
+        </div>
+      </div>
+    </div>
+    <div class="task"><b>3</b>퍼시 대왕이 좋아하는 색깔을 바꾸어 이야기를 새롭게 꾸며요. <em>창의</em></div>
+    <div class="duo" style="grid-template-columns:1fr 1.25fr;flex:1">
+      <div class="box"><img class="art" src="img/coloring_percy.webp" alt="퍼시 대왕 색칠 그림" style="max-height:92mm;object-fit:contain"><div class="cap" style="text-align:center">내가 고른 색으로 퍼시 대왕을 칠해요.</div></div>
+      <div class="box" style="justify-content:center">
+        <div class="cap">새로운 장면 대본</div>
+        <div class="talk">
+          <span class="who2">퍼시 대왕</span><svg class="guide" data-text="What color is it?" data-s="3.6"></svg>
+          <span class="who2">신하 2</span><svg class="guide" data-text="It’s red." data-s="3.6"></svg>
+          <span class="who2">퍼시 대왕</span><svg class="guide" data-text="I like ________!" data-s="3.6" data-solid="1"></svg>
+        </div>
+        <div class="cap" style="margin-top:1mm">색깔 낱말</div>
+        <div class="colors">
+          <span><i style="background:#e0453a"></i>red</span><span><i style="background:#f08a24"></i>orange</span><span><i style="background:#f4cf2c"></i>yellow</span><span><i style="background:#3faa4f"></i>green</span>
+          <span><i style="background:#3b74d6"></i>blue</span><span><i style="background:#9b59d0"></i>purple</span><span><i style="background:#f28bbf"></i>pink</span><span><i style="background:#8a5a34"></i>brown</span><span><i style="background:#fff"></i>white</span>
+        </div>
+      </div>
+    </div>
+    <div class="task"><b>4</b>역할극을 하고 스스로 돌아봐요.</div>
+    <div class="box">
+      <div class="roles"><span style="border:0;padding-left:0">내가 맡은 역할에 ○ 해요:</span><span>퍼시 대왕</span><span>신하 1</span><span>신하 2</span><span>꼬마</span><span>해설</span></div>
+      <table class="evalT">
+        <tr><th>우리 모둠에게 주고 싶은 점수는?</th><th>별 색칠</th></tr>
+        <tr><td>영어 표현을 바르게 말했어요.</td><td class="stars">★★★</td></tr>
+        <tr><td>자신 있게, 실감 나게 역할극을 했어요.</td><td class="stars">★★★</td></tr>
+        <tr><td>모둠 친구들과 협동했어요.</td><td class="stars">★★★</td></tr>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+const LINES=[
+ {s:1,who:"percy",m:"proud",en:"What color is it?",ko:"이건 무슨 색이니?",b:"What ______ is it?"},
+ {s:1,who:"s1",m:"sad",en:"It’s green.",ko:"초록색이에요.",b:"It’s ______."},
+ {s:2,who:"percy",m:"proud",en:"What color is it?",ko:"이건 무슨 색이니?",b:"What ______ is it?"},
+ {s:2,who:"s2",m:"sad",en:"It’s red.",ko:"빨간색이에요.",b:"It’s ______."},
+ {s:2,who:"percy",m:"grumpy",en:"I like purple!",ko:"나는 보라색이 좋아!",b:"I ______ ______!"},
+ {s:3,who:"percy",m:"proud",en:"What color is it?",ko:"이건 무슨 색이니?",b:"What ______ is it?"},
+ {s:3,who:"kid",m:"smile",en:"It’s blue.",ko:"파란색이에요.",b:"It’s ______."},
+ {s:4,who:"kid",m:"give",en:"This is for you.",ko:"이거 받으세요.",b:"This is ______ you."},
+ {s:4,who:"percy",m:"happy",en:"Oh, I like it! Thank you.",ko:"오, 마음에 들어! 고마워.",b:"Oh, I ______ it! ______ you."}
+];
+const SC={1:{bg:"bg_forest",t:"초록 나무 숲길"},2:{bg:"bg_mailbox",t:"빨간 우체통"},3:{bg:"bg_bluehouse",t:"파란 지붕 집의 꼬마"},4:{bg:"bg_purple",t:"보라색 안경 선물"}};
+const NM={percy:"퍼시 대왕",s1:"신하 1",s2:"신하 2",kid:"꼬마"};
+const PIC={percy:{proud:"percy_proud",grumpy:"percy_grumpy",happy:"percy_happy"},s1:{sad:"s1_sad"},s2:{sad:"s2_sad"},kid:{smile:"kid_smile",give:"kid_give"}};
+const BANK=["color","green","red","like","purple","blue","for","Thank"];
+let MODE="trace";
+
+/* 영어 4선 (위 · 가운데 · 빨간 기준선 · 아래) */
+function guide(svg,text,mode){
+  const s=+(svg.dataset.s||3.9),mm=96/25.4,W=Math.max(40,svg.getBoundingClientRect().width/mm);
+  svg.setAttribute("viewBox",`0 0 ${W.toFixed(1)} ${(3*s+.4).toFixed(1)}`);svg.style.height=(3*s+.4)+"mm";
+  let g="";[0,1,2,3].forEach(i=>{const y=(i*s+.1).toFixed(2);g+=`<line x1="0" x2="${W}" y1="${y}" y2="${y}" stroke="${i===2?"#e07a8a":"#c9bcd8"}" stroke-width="${i===2?.32:.22}" ${i===1?'stroke-dasharray="1 .8"':""}/>`});
+  if(text){
+    const fill=mode==="trace"?"#c9c2d3":"#3a2650";
+    g+=`<text x="1.5" y="${2*s}" font-family="Andika, Fredoka, sans-serif" font-size="${(1.95*s).toFixed(2)}" fill="${fill}" letter-spacing=".3">${text.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</text>`;
+  }
+  svg.innerHTML=g;
+}
+function drawScenes(){
+  let html="";
+  for(let s=1;s<=4;s++){
+    const rows=LINES.filter(l=>l.s===s).map(l=>{
+      const text=MODE==="trace"?l.en:l.b;
+      return `<div class="row"><div class="av"><img src="img/${PIC[l.who][l.m]}.webp" alt=""></div><div class="lineBox"><div class="ko"><span class="nm">${NM[l.who]}</span>${l.ko}</div><svg class="guide" data-s="4.6" data-text="${text}"></svg></div></div>`;
+    }).join("");
+    html+=`<div class="scene"><div class="thumb"><img src="img/${SC[s].bg}.webp" alt=""><div class="st"><i>장면 ${s+1}</i><br>${SC[s].t}</div></div><div class="rows">${rows}</div></div>`;
+  }
+  document.getElementById("scenes").innerHTML=html;
+  document.querySelectorAll("#scenes .guide").forEach(g=>guide(g,g.dataset.text,MODE));
+  document.getElementById("modeHint").textContent=MODE==="trace"?"흐린 글씨를 따라 써요.":"빈칸에 알맞은 낱말을 낱말 상자에서 골라 써요.";
+  const bank=document.getElementById("bank");bank.hidden=MODE!=="blank";
+  bank.innerHTML=`<span class="lb">낱말 상자</span>`+BANK.map(w=>`<span>${w}</span>`).join("");
+}
+function drawTalk(){document.querySelectorAll(".talk .guide").forEach(g=>guide(g,g.dataset.text,g.dataset.solid?"blank":"trace"))}
+drawScenes();drawTalk();
+document.fonts&&document.fonts.ready.then(()=>{drawScenes();drawTalk()});
+window.addEventListener("resize",()=>{drawScenes();drawTalk()});
+
+document.getElementById("mode").onclick=e=>{const b=e.target.closest("button");if(!b)return;MODE=b.dataset.m;document.querySelectorAll("#mode button").forEach(x=>x.setAttribute("aria-pressed",x===b));drawScenes()};
+document.getElementById("pages").onclick=e=>{const b=e.target.closest("button");if(!b)return;const p=b.dataset.p;document.querySelectorAll("#pages button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+  document.getElementById("pScript").hidden=p==="color";document.getElementById("pColor").hidden=p==="script";drawScenes();drawTalk()};
+document.getElementById("printBtn").onclick=()=>window.print();
+</script>
+</body>
+</html>

@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+<title>보라 대왕 퍼시</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Fredoka:wght@500;600;700&display=swap">
+<style>
+/* 레이아웃: 위쪽 탭 바 + 가운데 16:9 그림책 무대(프로젝터용) + 아래 조작 바 */
+:root{
+  --sky:#efe6f7;
+  --paper:#fffcfe;
+  --ink:#3a2650;
+  --muted:#7d6a8c;
+  --line:#e4d6ee;
+  --berry:#8a4fd1;
+  --berry-soft:#f1e6fb;
+  --moss:#2f9a8a;
+  --moss-soft:#ddf3ef;
+  --honey:#f6b6d6;
+  --honey-soft:#fde8f3;
+  --f-display:"Jua","Gowun Dodum",system-ui,sans-serif;
+  --f-body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-en:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{background:var(--sky);color:var(--ink);font-family:var(--f-body);font-size:16px;overflow:hidden}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--berry);outline-offset:2px}
+
+.app{height:100%;display:flex;flex-direction:column;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px;gap:10px}
+
+/* 탭 바 */
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-size:26px;line-height:1}
+.brand svg{width:44px;height:auto}
+.brand img{height:40px;width:auto;display:block}
+.brand small{display:block;font-family:var(--f-body);font-size:12px;color:var(--muted);margin-top:3px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.tab{border:2px solid var(--line);background:var(--paper);border-radius:999px;padding:8px 16px;font-family:var(--f-display);font-size:18px;display:flex;align-items:center;gap:6px}
+.tab b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--line);font-size:13px;font-family:var(--f-en)}
+.tab[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.tab[aria-selected="true"] b{background:var(--honey);color:var(--ink)}
+.printLink{text-decoration:none;color:var(--ink);background:var(--honey-soft);border-color:var(--honey)}
+
+.view{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+
+/* 무대 */
+.stageBox{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+.stage{position:relative;aspect-ratio:16/9;width:min(100%,calc((100dvh - 190px) * 1.7778));max-width:100%;container-type:inline-size;border-radius:18px;overflow:hidden;background:var(--paper);box-shadow:0 6px 0 rgba(58,38,80,.12)}
+.bg{position:absolute;inset:0}
+.bg svg{width:100%;height:100%;display:block}
+.actor{position:absolute;bottom:5%;transform:translateX(-50%);transition:left .6s ease}
+.actor svg{width:100%;height:auto;display:block;overflow:visible}
+.actor.flip svg,.actor.flip img{transform:scaleX(-1)}
+.actor.pic{height:var(--h);width:auto}
+.actor.pic img{height:100%;width:auto;display:block;filter:drop-shadow(0 .6cqw .5cqw rgba(30,30,20,.22))}
+.actor.pic::after{content:"";position:absolute;left:12%;right:12%;bottom:-1.2cqw;height:2.4cqw;border-radius:50%;background:radial-gradient(closest-side,rgba(20,30,10,.35),transparent);z-index:-1}
+.bg .bgImg{width:100%;height:100%;object-fit:cover;display:block}
+.truckImg{position:absolute;right:4%;bottom:9%;height:26%;animation:driveL 6.5s ease-in 1s forwards;filter:drop-shadow(0 .5cqw .5cqw rgba(0,0,0,.25))}
+@keyframes driveL{to{transform:translateX(-120cqw)}}
+.cover{position:absolute;inset:0;z-index:5;cursor:pointer}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.cover .ttl{position:absolute;left:50%;top:7%;transform:translateX(-50%);text-align:center;color:var(--ink);font-family:var(--f-display);font-size:6cqw;line-height:1.1;white-space:nowrap;text-shadow:0 .3cqw 0 #fff,0 0 2cqw #fff}
+.cover .ttl small{display:block;font-size:2.4cqw;font-family:var(--f-en);font-weight:600;color:var(--muted);margin-top:.6cqw}
+.cover .go{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);border:.3cqw solid var(--ink);background:var(--paper);border-radius:99px;font-family:var(--f-display);font-size:2.6cqw;padding:1cqw 3cqw;box-shadow:0 .5cqw 0 rgba(58,38,80,.25)}
+.actor.speaking{animation:hop .7s ease}
+@keyframes hop{0%,100%{translate:0 0}35%{translate:0 -6%}60%{translate:0 0}80%{translate:0 -2%}}
+.tag{position:absolute;left:50%;bottom:-2.6cqw;transform:translateX(-50%);white-space:nowrap;background:var(--ink);color:var(--paper);font-family:var(--f-display);font-size:1.7cqw;padding:.2cqw 1cqw;border-radius:99px}
+.tag:empty{display:none}
+
+.bubble{position:absolute;max-width:46cqw;background:#fff;border:.32cqw solid var(--ink);border-radius:2.2cqw;padding:1.2cqw 2cqw 1.3cqw;text-align:center;box-shadow:0 .5cqw 0 rgba(58,38,80,.18);animation:pop .35s cubic-bezier(.3,1.6,.6,1)}
+.bubble::after{content:"";position:absolute;bottom:-1.9cqw;left:var(--tail,50%);transform:translateX(-50%);border:1.4cqw solid transparent;border-top:1.9cqw solid var(--ink)}
+.bubble::before{content:"";position:absolute;bottom:-1.25cqw;left:var(--tail,50%);transform:translateX(-50%);border:1cqw solid transparent;border-top:1.4cqw solid #fff;z-index:1}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.bubble .who{display:inline-block;font-family:var(--f-display);font-size:1.6cqw;background:var(--honey-soft);border-radius:99px;padding:.1cqw 1cqw;margin-bottom:.4cqw}
+.bubble .ko{font-family:var(--f-display);font-size:3.6cqw;line-height:1.25}
+.bubble .en{font-family:var(--f-en);font-weight:600;font-size:3.6cqw;line-height:1.2;color:var(--ink)}
+.bubble .sub{font-family:var(--f-display);font-size:2cqw;color:var(--muted);margin-top:.3cqw}
+.bubble .hint{font-family:var(--f-en);font-weight:600;font-size:2.3cqw;color:var(--berry);margin-top:.5cqw}
+.bubble.wide{max-width:70cqw}
+
+.narr{position:absolute;top:2.4cqw;left:50%;transform:translateX(-50%);width:84cqw;background:rgba(255,253,248,.95);border:.25cqw solid var(--ink);border-radius:1.6cqw;padding:1.4cqw 2.4cqw;font-size:2.35cqw;line-height:1.55;animation:pop .35s ease}
+.narr .lab{font-family:var(--f-display);font-size:1.7cqw;color:var(--paper);background:var(--moss);border-radius:99px;padding:.1cqw 1.1cqw;margin-right:.8cqw;vertical-align:.2cqw}
+.narr .reader{font-family:var(--f-display);font-size:1.6cqw;color:var(--muted);margin-left:.6cqw}
+.narr button{float:right;border:.2cqw solid var(--line);background:var(--paper);border-radius:99px;font-size:1.6cqw;padding:.2cqw 1.2cqw;margin-left:1cqw;font-family:var(--f-display)}
+
+.countRow{position:absolute;left:50%;top:3cqw;transform:translateX(-50%);display:flex;gap:1cqw;align-items:center}
+.countRow span{width:5.6cqw;height:5.6cqw;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.7);border:.25cqw solid var(--ink);font-family:var(--f-en);font-weight:700;font-size:2.6cqw;transition:transform .2s,background .2s}
+.countRow span.on{background:var(--honey);transform:scale(1.18)}
+.countRow button{margin-left:1cqw;border:.25cqw solid var(--ink);background:var(--paper);border-radius:99px;font-family:var(--f-display);font-size:1.9cqw;padding:.6cqw 1.6cqw}
+
+.sceneChip{position:absolute;left:1.6cqw;bottom:1.4cqw;font-family:var(--f-display);font-size:1.6cqw;background:rgba(58,38,80,.75);color:var(--paper);border-radius:99px;padding:.3cqw 1.2cqw}
+
+/* 조작 바 */
+.ctrl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+.btn{border:2px solid var(--ink);background:var(--paper);border-radius:12px;padding:8px 14px;font-family:var(--f-display);font-size:18px;display:inline-flex;gap:6px;align-items:center}
+.btn.main{background:var(--ink);color:var(--paper)}
+.btn.soft{border-color:var(--line)}
+.btn[aria-pressed="true"]{background:var(--honey);border-color:var(--ink)}
+.btn:disabled{opacity:.35;cursor:default}
+.prog{display:flex;gap:6px;align-items:center;font-family:var(--f-display);font-size:16px;color:var(--muted)}
+.dots{display:flex;gap:4px}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--line);display:block}
+.dots i.done{background:var(--moss)}
+.dots i.now{background:var(--berry);transform:scale(1.3)}
+
+/* 배역 패널 */
+.cast{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:10px 14px}
+.cast label{display:flex;align-items:center;gap:6px;font-family:var(--f-display);font-size:17px}
+.cast input{width:110px;border:2px solid var(--line);border-radius:10px;padding:6px 8px;font:inherit;font-family:var(--f-body);font-size:16px;background:#fff}
+
+/* 대사 외우기 */
+.memoBar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:10px 14px}
+.seg{display:flex;border:2px solid var(--ink);border-radius:12px;overflow:hidden}
+.seg button{border:0;background:var(--paper);padding:8px 12px;font-family:var(--f-display);font-size:17px;border-right:2px solid var(--ink)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.music{display:flex;align-items:center;gap:8px;margin-left:auto}
+.music input{width:100px;accent-color:var(--berry)}
+.note{display:inline-block}
+.playing .note{animation:bob 1.2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-4px) rotate(-8deg)}}
+.timer{font-family:var(--f-en);font-weight:600;font-size:22px;min-width:66px;text-align:center;font-variant-numeric:tabular-nums}
+.timer.end{color:var(--berry)}
+.cards{flex:1;min-height:0;overflow:auto;display:grid;grid-auto-rows:max-content;grid-template-columns:repeat(auto-fill,minmax(min(100%,500px),1fr));gap:10px;align-content:start;padding:2px}
+.scHead{grid-column:1/-1;font-family:var(--f-display);font-size:18px;color:var(--muted);display:flex;align-items:center;gap:8px;margin-top:6px}
+.scHead::after{content:"";flex:1;height:2px;background:var(--line)}
+.card{position:relative;display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center;background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:10px 12px;overflow:clip}
+.card.active{border-color:var(--berry);box-shadow:0 0 0 3px var(--berry-soft)}
+.card .av{width:72px;height:72px;display:grid;place-items:center}
+.card .av svg{width:100%;height:auto;display:block}
+.card .av img{max-width:100%;max-height:100%;display:block}
+.card .who{font-family:var(--f-display);font-size:15px;color:var(--muted)}
+.card .ko{font-family:var(--f-display);font-size:20px}
+.card .en{font-family:var(--f-en);font-weight:600;font-size:27px;line-height:1.25;min-height:34px;min-width:0;overflow-wrap:anywhere}
+.card .en .blank{display:inline-block;min-width:2.6em;border-bottom:3px solid var(--berry);color:transparent;margin:0 2px}
+.card .en .hidden{color:var(--muted);font-size:18px;font-family:var(--f-display)}
+.card.peek .en .blank{color:var(--berry)}
+.card .play{width:52px;height:52px;border-radius:50%;border:2px solid var(--ink);background:var(--honey-soft);font-size:20px}
+.card .bar{position:absolute;left:0;bottom:0;height:5px;background:var(--moss);width:0}
+.card .rep{position:absolute;right:76px;top:8px;font-family:var(--f-display);font-size:14px;color:var(--moss)}
+
+/* 사후 활동 */
+.post{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.panel{background:var(--paper);border:2px solid var(--line);border-radius:18px;padding:16px 18px}
+.panel h2{font-family:var(--f-display);font-weight:400;font-size:26px;margin:0 0 4px}
+.panel p.lead{margin:0 0 12px;color:var(--muted);font-size:17px}
+.quizQ{display:flex;flex-direction:column;align-items:center;gap:14px;padding:8px 0}
+.quizQ .line{font-family:var(--f-en);font-weight:600;font-size:clamp(28px,5vw,52px);text-align:center}
+.quizQ .ko{font-family:var(--f-display);font-size:20px;color:var(--muted)}
+.choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;width:min(100%,760px)}
+.choice{border:3px solid var(--line);background:#fff;border-radius:16px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:var(--f-display);font-size:19px}
+.choice svg{width:80%;max-width:110px;height:auto}
+.choice img{height:110px;max-width:100%;object-fit:contain}
+.choice.ok{border-color:var(--moss);background:var(--moss-soft)}
+.choice.no{border-color:var(--berry);background:var(--berry-soft)}
+.qfoot{display:flex;gap:12px;align-items:center;justify-content:center;font-family:var(--f-display);font-size:20px}
+.giftGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.pick{border:2px solid var(--line);background:#fff;border-radius:14px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:var(--f-display);font-size:16px}
+.pick .em{font-size:30px;line-height:1.1}
+.pick .enw{font-family:var(--f-en);font-weight:600;font-size:17px}
+.pick[aria-pressed="true"]{border-color:var(--berry);background:var(--berry-soft)}
+.feelGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.giftWrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px}
+.giftWrap h3{font-family:var(--f-display);font-weight:400;font-size:19px;margin:6px 0}
+.mini{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:16/10;container-type:inline-size;background:var(--honey-soft);min-width:0}
+.mini .bg svg{width:100%;height:100%}
+.mini .actor{bottom:6%}
+.mini .gift{position:absolute;left:12%;bottom:8%;height:26%;transform:translateX(-50%);animation:pop .4s ease}
+.mini .gift img{height:100%;width:auto;filter:drop-shadow(0 .6cqw .5cqw rgba(0,0,0,.25))}
+.pick .em img{height:48px;width:auto;display:block;margin:0 auto}
+.mini .bubble{max-width:44cqw}
+.mini .bubble .en{font-size:5cqw}
+.mini .bubble .sub{font-size:3.1cqw}
+.mini .story{position:absolute;top:3cqw;left:50%;transform:translateX(-50%);width:90cqw;text-align:center;background:rgba(255,253,248,.92);border-radius:2cqw;padding:1.6cqw;font-size:3.2cqw;font-family:var(--f-display)}
+.evalT{width:100%;border-collapse:collapse;font-size:18px}
+.evalT th,.evalT td{border-bottom:2px solid var(--line);padding:8px 6px;text-align:center}
+.evalT th{font-family:var(--f-display);font-weight:400;font-size:19px}
+.evalT td:first-child{font-family:var(--f-display)}
+.stars{display:inline-flex;gap:2px}
+.stars button{border:0;background:none;font-size:28px;line-height:1;color:var(--line);padding:0 2px}
+.stars button.on{color:var(--honey);text-shadow:0 0 0 var(--ink)}
+.total{font-family:var(--f-en);font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}
+.tableWrap{overflow-x:auto}
+
+.toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);background:var(--ink);color:var(--paper);font-family:var(--f-display);font-size:22px;padding:10px 22px;border-radius:99px;z-index:20;animation:pop .3s ease}
+
+@media (max-width:760px){
+  .giftWrap{grid-template-columns:1fr}
+  .choices{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .feelGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .music{margin-left:0}
+  body{overflow:auto}
+  .app{height:auto;min-height:100%}
+  .stage{width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* 보라 대왕 퍼시 전용 */
+body{background:radial-gradient(120% 90% at 20% 0%,#fbe6f2 0,transparent 55%),radial-gradient(120% 90% at 100% 100%,#dff3ef 0,transparent 55%),var(--sky)}
+.brand img{height:46px}
+.modeLink{text-decoration:none;color:var(--ink);background:var(--moss-soft);border-color:var(--moss)}
+.cover .ttl{top:5%;color:#fff;text-shadow:0 .35cqw 0 #5b3a86,0 0 2.4cqw rgba(91,58,134,.9)}
+.cover .ttl small{color:#fff;text-shadow:0 .2cqw 0 #5b3a86}
+.cover .go{background:#fff;border-color:#5b3a86;color:#5b3a86}
+.actor.pic img{filter:drop-shadow(0 .6cqw .5cqw rgba(40,20,60,.25))}
+.bg .bgImg{transition:filter 1.2s ease}
+.bg.glass::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,transparent 55%,rgba(90,40,140,.35));pointer-events:none}
+.glint{position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 48%,transparent 62%);background-size:250% 100%;animation:glint 1.6s ease forwards}
+@keyframes glint{from{background-position:120% 0}to{background-position:-60% 0}}
+.swatch{display:inline-block;width:1.1em;height:1.1em;border-radius:50%;border:2px solid var(--ink);vertical-align:-.15em;margin-right:.25em}
+.colorGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.colorGrid .pick .dot{width:42px;height:42px;border-radius:50%;border:3px solid var(--ink);display:block}
+.lineList{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.lineList div{background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 12px;font-size:18px}
+.lineList b{font-family:var(--f-display);font-weight:400;color:var(--muted);margin-right:8px}
+.lineList .en{font-family:var(--f-en);font-weight:600;font-size:22px}
+.lineList .hl{color:var(--berry)}
+/* 학생 화면 */
+body.student .tab[data-tab="story"],body.student .tab[data-tab="role"],body.student .printLink,body.student [data-p="eval"]{display:none}
+body:not(.student) .stuOnly{display:none}
+body.student .teaOnly{display:none!important}
+.timerSet{display:contents}
+.lockBg{position:fixed;inset:0;background:rgba(40,20,60,.45);display:grid;place-items:center;z-index:30}
+.lockBox{background:var(--paper);border:3px solid var(--ink);border-radius:18px;padding:20px 22px;width:min(92vw,340px);text-align:center;animation:pop .3s ease}
+.lockBox h3{font-family:var(--f-display);font-weight:400;font-size:24px;margin:0 0 6px}
+.lockBox input{width:100%;font-size:28px;text-align:center;letter-spacing:.3em;border:2px solid var(--line);border-radius:12px;padding:8px;margin:10px 0;font-family:var(--f-en)}
+.lockBox .err{color:#c0392b;min-height:22px;font-family:var(--f-display)}
+.lockBox .row{display:flex;gap:8px;justify-content:center}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand"><span id="logo"></span><div>보라 대왕 퍼시<small>Lesson 9 · 4차시 Story Land 역할극</small></div></div>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="story" aria-selected="true"><b>1</b>이야기 보기</button>
+      <button class="tab" role="tab" data-tab="memo" aria-selected="false"><b>2</b>대사 외우기</button>
+      <button class="tab" role="tab" data-tab="role" aria-selected="false"><b>3</b>역할극</button>
+      <button class="tab" role="tab" data-tab="post" aria-selected="false"><b>4</b>사후 활동</button>
+      <a class="tab printLink" href="worksheet.html" target="_blank" rel="noopener">🖨️ 학습지 인쇄</a>
+      <a class="tab modeLink teaOnly" href="?s=1" target="_blank" rel="noopener">🧒 학생용 화면</a>
+      <button class="tab modeLink stuOnly" id="teacherBtn" type="button">🔒 교사용</button>
+    </nav>
+  </header>
+
+  <!-- 이야기 보기 / 역할극 공용 무대 -->
+  <section class="view" id="stageView">
+    <div class="cast" id="castPanel" hidden></div>
+    <div class="stageBox"><div class="stage" id="stage">
+      <div class="bg" id="bg"></div>
+      <div id="actors"></div>
+      <div id="overlay"></div>
+      <div class="sceneChip" id="sceneChip"></div>
+      <div class="cover" id="cover"><img src="img/cover.webp" alt="보라 성 앞의 퍼시 대왕과 친구들"><div class="ttl">보라 대왕 퍼시<small>Percy the Purple</small></div><button class="go" type="button">이야기 시작 ▶</button></div>
+    </div></div>
+    <div class="ctrl">
+      <button class="btn soft" id="prevBtn">◀ 이전</button>
+      <div class="prog"><span id="progTxt"></span><div class="dots" id="dots"></div></div>
+      <button class="btn main" id="nextBtn">다음 ▶</button>
+      <span style="width:8px"></span>
+      <button class="btn soft" id="listenBtn">🔊 영어 듣기</button>
+      <button class="btn soft" id="autoBtn" aria-pressed="true">자동 읽기</button>
+      <button class="btn soft" id="hintBtn" aria-pressed="false" hidden>영어 힌트</button>
+      <button class="btn soft" id="castBtn" aria-pressed="false" hidden>배역 정하기</button>
+      <button class="btn soft" id="restartBtn">처음부터</button>
+      <button class="btn soft" id="sndBtn" aria-pressed="true">🔈 효과음·배경음</button>
+    </div>
+  </section>
+
+  <!-- 대사 외우기 -->
+  <section class="view" id="memoView" hidden>
+    <div class="memoBar">
+      <div class="seg" id="levelSeg">
+        <button data-lv="1" aria-pressed="true">① 보고 읽기</button>
+        <button data-lv="2" aria-pressed="false">② 빈칸</button>
+        <button data-lv="3" aria-pressed="false">③ 첫 글자</button>
+        <button data-lv="4" aria-pressed="false">④ 우리말만</button>
+      </div>
+      <div class="seg" id="roleSeg"></div>
+      <button class="btn" id="drillBtn">🗣️ 듣고 따라 말하기</button>
+      <div class="music" id="musicBox">
+        <button class="btn" id="musicBtn"><span class="note">♪</span> <span id="musicTxt">음악 켜기</span></button>
+        <input type="range" id="vol" min="0" max="100" value="55" aria-label="음악 크기">
+      </div>
+      <span class="teaOnly timerSet">
+        <button class="btn soft" data-min="3">3분</button>
+        <button class="btn soft" data-min="5">5분</button>
+        <span class="timer" id="timer">--:--</span>
+      </span>
+    </div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <!-- 사후 활동 -->
+  <section class="view" id="postView" hidden>
+    <div class="ctrl" style="justify-content:flex-start">
+      <div class="seg" id="postSeg">
+        <button data-p="quiz" aria-pressed="true">누가 말했을까?</button>
+        <button data-p="color" aria-pressed="false">좋아하는 색을 바꿔 봐요</button>
+        <button data-p="eval" aria-pressed="false">모둠 평가</button>
+      </div>
+    </div>
+    <div class="post">
+      <div class="panel" id="p-quiz"></div>
+      <div class="panel" id="p-color" hidden></div>
+      <div class="panel" id="p-eval" hidden></div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ---------- 등장인물 (구글 플로우 그림) ---------- */
+const CH={percy:{ko:"퍼시 대왕"},s1:{ko:"신하 1"},s2:{ko:"신하 2"},kid:{ko:"꼬마"}};
+const IMG={
+  percy:{normal:"percy_proud",proud:"percy_proud",grumpy:"percy_grumpy",sad:"percy_sad",happy:"percy_happy"},
+  s1:{normal:"s1_sad",sad:"s1_sad",happy:"s1_happy"},
+  s2:{normal:"s2_sad",sad:"s2_sad",happy:"s2_happy"},
+  kid:{normal:"kid_smile",happy:"kid_smile",give:"kid_give"}
+};
+const HEIGHT={percy:50,s1:56,s2:40,kid:42};
+function pic(k,mood,style=""){const f=IMG[k][mood]||IMG[k].normal;return `<img src="img/${f}.webp" alt="${CH[k].ko}" draggable="false"${style?` style="${style}"`:""}>`}
+Object.values(IMG).forEach(m=>Object.values(m).forEach(f=>{const i=new Image();i.src=`img/${f}.webp`}));
+document.getElementById("logo").innerHTML=pic("percy","happy");
+
+/* ---------- 이야기 (교과서 대사는 그대로, 해설로 원작 『Percy the Pink』 줄거리를 살림) ---------- */
+const SCENES=[
+ {title:"보라색을 좋아하는 대왕",bg:"palace",cast:{s1:{x:20},percy:{x:50},s2:{x:79}},moods:{percy:"proud",s1:"happy",s2:"happy"},
+  steps:[{t:"narr",v:"narr_01",ko:"보라 왕국에는 보라색을 너무너무 좋아하는 퍼시 대왕이 살았어요. 왕관도, 망토도, 신발도 모두 보라색! 그래서 사람들은 퍼시 대왕을 ‘보라 대왕’이라고 불렀답니다."},
+         {t:"narr",v:"narr_02",ko:"어느 맑은 날, 퍼시 대왕은 신하들을 데리고 왕국 구경을 나섰어요. 그런데 퍼시 대왕은 보라색이 아닌 것만 보면 꼭 이렇게 물었어요."}]},
+ {title:"초록 나무 숲길",bg:"forest",cast:{percy:{x:30},s1:{x:66}},moods:{percy:"proud",s1:"sad"},
+  steps:[{t:"narr",v:"narr_03",ko:"숲길에 들어서자 커다란 초록 나무들이 보였어요. 퍼시 대왕이 나무를 가리켰어요."},
+         {t:"line",who:"percy",en:"What color is it?",ko:"이건 무슨 색이니?"},
+         {t:"line",who:"s1",en:"It’s green.",ko:"초록색이에요."},
+         {t:"narr",v:"narr_04",ko:"퍼시 대왕은 고개를 홱 저었어요. “초록 나무라니! 당장 보라색으로 칠해라!” 신하 1은 한숨을 푹 쉬며 붓을 들었어요.",moods:{percy:"grumpy"}}]},
+ {title:"빨간 우체통",bg:"mailbox",cast:{s1:{x:14},percy:{x:40},s2:{x:66}},moods:{percy:"proud",s1:"sad",s2:"sad"},
+  steps:[{t:"narr",v:"narr_05",ko:"이번에는 마을 길가에 서 있는 동그란 우체통이 눈에 띄었어요."},
+         {t:"line",who:"percy",en:"What color is it?",ko:"이건 무슨 색이니?"},
+         {t:"line",who:"s2",en:"It’s red.",ko:"빨간색이에요."},
+         {t:"line",who:"percy",en:"I like purple!",ko:"나는 보라색이 좋아!",moods:{percy:"grumpy"}},
+         {t:"narr",v:"narr_06",ko:"신하 2는 시무룩하게 우체통을 보라색으로 칠했어요. 나무도, 우체통도, 꽃도… 왕국이 점점 보라색으로 변해 갔어요.",moods:{percy:"grumpy"}}]},
+ {title:"파란 지붕 집의 꼬마",bg:"bluehouse",cast:{s1:{x:10},s2:{x:27},percy:{x:50},kid:{x:80}},moods:{percy:"proud",s1:"sad",s2:"sad",kid:"happy"},
+  steps:[{t:"narr",v:"narr_07",ko:"언덕 위에 파란 지붕 집이 있었어요. 집 앞에는 한 꼬마가 생글생글 웃으며 서 있었지요."},
+         {t:"line",who:"percy",en:"What color is it?",ko:"이건 무슨 색이니?"},
+         {t:"line",who:"kid",en:"It’s blue.",ko:"파란색이에요."},
+         {t:"narr",v:"narr_08",ko:"꼬마는 손가락으로 하늘을 가리켰어요. 지붕은 칠할 수 있어도, 저 넓고 파란 하늘은 아무도 칠할 수 없었어요. 퍼시 대왕은 시무룩해졌어요.",moods:{percy:"sad"}}]},
+ {title:"보라색 안경 선물",bg:"bluehouse",cast:{s1:{x:10},s2:{x:27},percy:{x:50},kid:{x:78}},moods:{percy:"sad",s1:"sad",s2:"sad",kid:"give"},
+  steps:[{t:"line",who:"kid",en:"This is for you.",ko:"이거 받으세요."},
+         {t:"narr",v:"narr_09",ko:"꼬마가 내민 건 반짝반짝 빛나는 보라색 안경이었어요."},
+         {t:"narr",v:"narr_10",bg:"purple",ko:"퍼시 대왕이 안경을 쓰자… 우와! 하늘도, 나무도, 집도, 온 세상이 보라색으로 보였어요!",moods:{percy:"happy",kid:"happy"},glass:true},
+         {t:"line",who:"percy",bg:"purple",en:"Oh, I like it! Thank you.",ko:"오, 마음에 들어! 고마워.",moods:{percy:"happy",kid:"happy"}},
+         {t:"narr",v:"narr_11",ko:"그날부터 퍼시 대왕은 아무것도 칠하라고 하지 않았어요. 신하들은 나무와 우체통을 원래 색으로 되돌렸고, 보라 왕국 사람들은 모두 행복하게 살았답니다. 끝!",moods:{percy:"happy",s1:"happy",s2:"happy",kid:"happy"}}]}
+];
+const STEPS=[];SCENES.forEach((s,si)=>s.steps.forEach((st,i)=>STEPS.push({...st,scene:si,i})));
+const VMAP={"percy|What color is it?":"v_percy_what","s1|It’s green.":"v_s1_green","s2|It’s red.":"v_s2_red","percy|I like purple!":"v_percy_purple","kid|It’s blue.":"v_kid_blue","kid|This is for you.":"v_kid_foryou","percy|Oh, I like it! Thank you.":"v_percy_likeit"};
+STEPS.forEach(st=>{if(st.t==="line")st.v=VMAP[st.who+"|"+st.en]});
+const LINES=STEPS.filter(s=>s.t==="line");
+
+/* ---------- 소리 (구글 AI 스튜디오 음성 · 플로우 음악, 파일이 없으면 기계 음성·합성음) ---------- */
+const SND=new Set(["bgm_happy", "bgm_memorize", "bgm_royal", "narr_01", "narr_02", "narr_03", "narr_04", "narr_05", "narr_06", "narr_07", "narr_08", "narr_09", "narr_10", "narr_11", "sfx_birds", "sfx_correct", "sfx_page", "sfx_party", "sfx_pop", "sfx_star", "sfx_timeup", "sfx_wrong", "v_kid_blue", "v_kid_foryou", "v_percy_like_blue", "v_percy_like_brown", "v_percy_like_green", "v_percy_like_orange", "v_percy_like_pink", "v_percy_like_red", "v_percy_like_white", "v_percy_like_yellow", "v_percy_likeit", "v_percy_purple", "v_percy_what", "v_s1_green", "v_s2_red"]);
+const has=n=>!!n&&SND.has(n);
+const Snd={on:true,ducked:false,loops:{amb:null,bgm:null},want:{amb:null,bgm:null}};
+function sfx(n,vol=.8){if(!Snd.on||!has(n))return false;const a=new Audio(`snd/${n}.mp3`);a.volume=vol;a.play().catch(()=>{});return true}
+let voiceAudio=null;
+function stopVoice(){if(voiceAudio){const a=voiceAudio;voiceAudio=null;a.pause()}try{speechSynthesis.cancel()}catch(e){}}
+function playFile(n){return new Promise(res=>{const a=new Audio(`snd/${n}.mp3`);voiceAudio=a;duckAll(true);let done=false;
+  const fin=()=>{if(done)return;done=true;if(voiceAudio===a)voiceAudio=null;duckAll(false);res()};
+  a.onended=fin;a.onerror=fin;a.onpause=fin;a.play().catch(fin)})}
+function say(n,text,lang,rate){stopVoice();return has(n)?playFile(n):speak(text,lang,rate)}
+function duckAll(d){Snd.ducked=d;Music.duck(d);Object.values(Snd.loops).forEach(a=>{if(a)a.volume=a._v*(d?.35:1)})}
+function loop(kind,n,vol){
+  Snd.want[kind]=n?{n,vol}:null;
+  const cur=Snd.loops[kind];
+  if(cur&&cur._n===n&&Snd.on){cur._v=vol;cur.volume=vol*(Snd.ducked?.35:1);if(cur.paused)cur.play().catch(()=>{});return}
+  if(cur){cur.pause();Snd.loops[kind]=null}
+  if(!n||!has(n)||!Snd.on)return;
+  const a=new Audio(`snd/${n}.mp3`);a.loop=true;a._n=n;a._v=vol;a.volume=vol*(Snd.ducked?.35:1);Snd.loops[kind]=a;a.play().catch(()=>{});
+}
+function relaunch(){Object.entries(Snd.want).forEach(([k,w])=>{if(w)loop(k,w.n,w.vol)})}
+document.addEventListener("pointerdown",()=>{Object.values(Snd.loops).forEach(a=>{if(a&&a.paused)a.play().catch(()=>{})})},{passive:true});
+let voices=[];function loadVoices(){try{voices=speechSynthesis.getVoices()}catch(e){}}
+loadVoices();try{speechSynthesis.onvoiceschanged=loadVoices}catch(e){}
+function pickVoice(lang){const v=voices.filter(v=>v.lang&&v.lang.replace("_","-").startsWith(lang.slice(0,2)));return v.find(x=>/Google/.test(x.name)&&x.lang.replace("_","-")===lang)||v.find(x=>x.lang.replace("_","-")===lang)||v[0]}
+function speak(text,lang="en-US",rate=.82){
+  return new Promise(res=>{
+    try{
+      speechSynthesis.cancel();Music.duck(true);
+      const u=new SpeechSynthesisUtterance(text.replace(/’/g,"'"));u.lang=lang;u.rate=rate;const v=pickVoice(lang);if(v)u.voice=v;
+      let done=false;const fin=()=>{if(done)return;done=true;Music.duck(false);res()};
+      u.onend=fin;u.onerror=fin;setTimeout(fin,9000);speechSynthesis.speak(u);
+    }catch(e){res()}
+  });
+}
+const Music=(()=>{
+  let ctx,master,bus,playing=false,timer,next=0,idx=0,loopStart=0,vol=.55,ducked=false;
+  const BPM=76,B=60/BPM;
+  const mel=[[72,1],[69,.5],[72,.5],[77,1],[74,1],[74,1],[72,.5],[69,.5],[72,2],[65,1],[67,.5],[69,.5],[72,1],[69,1],[67,1.5],[69,.5],[67,2],
+             [77,1],[74,.5],[72,.5],[74,1],[77,1],[81,1],[77,1],[74,2],[74,.5],[72,.5],[69,1],[67,.5],[69,.5],[72,1],[67,1],[69,1],[65,2]];
+  const ev=[];let t=0;mel.forEach(([m,d])=>{ev.push({t,m,d,k:"bell"});t+=d});
+  const LEN=t;[41,38,34,36,41,38,34,36].forEach((r,bar)=>{ev.push({t:bar*4,m:r,d:2,k:"bass"});ev.push({t:bar*4+2,m:r+7,d:2,k:"bass"})});
+  ev.sort((a,b)=>a.t-b.t);
+  const hz=m=>440*Math.pow(2,(m-69)/12);
+  function init(){
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    master=ctx.createGain();master.gain.value=0;master.connect(ctx.destination);
+    const lp=ctx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=3200;lp.connect(master);
+    bus=ctx.createGain();bus.gain.value=1;bus.connect(lp);
+    const dl=ctx.createDelay();dl.delayTime.value=B*.75;const fb=ctx.createGain();fb.gain.value=.3;const wet=ctx.createGain();wet.gain.value=.28;
+    bus.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(wet);wet.connect(lp);
+  }
+  function bell(time,m){
+    const f=hz(m),g=ctx.createGain();g.gain.setValueAtTime(0,time);g.gain.linearRampToValueAtTime(.22,time+.006);g.gain.exponentialRampToValueAtTime(.001,time+1.8);g.connect(bus);
+    [[1,1],[2,.22],[3.01,.07]].forEach(([mul,a])=>{const o=ctx.createOscillator(),og=ctx.createGain();o.type="sine";o.frequency.value=f*mul;og.gain.value=a;o.connect(og);og.connect(g);o.start(time);o.stop(time+1.9)});
+  }
+  function bass(time,m,d){
+    const o=ctx.createOscillator(),g=ctx.createGain();o.type="triangle";o.frequency.value=hz(m+12);
+    g.gain.setValueAtTime(0,time);g.gain.linearRampToValueAtTime(.07,time+.08);g.gain.exponentialRampToValueAtTime(.001,time+d*B*.95);
+    o.connect(g);g.connect(bus);o.start(time);o.stop(time+d*B);
+  }
+  function tick(){
+    while(next<ctx.currentTime+.35){
+      const e=ev[idx];const time=loopStart+e.t*B;
+      if(e.k==="bell")bell(time,e.m);else bass(time,e.m,e.d);
+      idx++;if(idx>=ev.length){idx=0;loopStart+=LEN*B}
+      next=loopStart+ev[idx].t*B;
+    }
+  }
+  function level(){if(!master)return;const target=playing?vol*(ducked?.3:1):0;master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setTargetAtTime(target,ctx.currentTime,.25)}
+  return{
+    get on(){return playing},
+    start(){if(playing)return;if(!ctx)init();ctx.resume();playing=true;idx=0;loopStart=ctx.currentTime+.15;next=loopStart;timer=setInterval(tick,60);tick();level();ui()},
+    stop(){if(!playing)return;playing=false;level();clearInterval(timer);ui()},
+    vol(v){vol=v;level()},
+    duck(d){ducked=d;level()},
+    chime(){if(!ctx)init();ctx.resume();const tt=ctx.currentTime;[84,88,91,96].forEach((m,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=hz(m);g.gain.setValueAtTime(0,tt+i*.15);g.gain.linearRampToValueAtTime(.18,tt+i*.15+.01);g.gain.exponentialRampToValueAtTime(.001,tt+i*.15+1.2);o.connect(g);g.connect(ctx.destination);o.start(tt+i*.15);o.stop(tt+i*.15+1.3)})},
+    pop(){if(!ctx)init();ctx.resume();const tt=ctx.currentTime,o=ctx.createOscillator(),g=ctx.createGain();o.frequency.setValueAtTime(520,tt);o.frequency.exponentialRampToValueAtTime(900,tt+.08);g.gain.setValueAtTime(.12,tt);g.gain.exponentialRampToValueAtTime(.001,tt+.15);o.connect(g);g.connect(ctx.destination);o.start(tt);o.stop(tt+.16)}
+  };
+  function ui(){document.getElementById("musicTxt").textContent=playing?"음악 끄기":"음악 켜기";document.getElementById("musicBox").classList.toggle("playing",playing)}
+})();
+
+
+const MemoMusic={
+  on:false,vol:.55,
+  start(){this.on=true;if(has("bgm_memorize"))loop("bgm","bgm_memorize",this.vol);else Music.start();this.ui()},
+  stop(){this.on=false;if(has("bgm_memorize"))loop("bgm",null);else Music.stop();this.ui()},
+  toggle(){this.on?this.stop():this.start()},
+  setVol(v){this.vol=v;if(has("bgm_memorize")){if(this.on)loop("bgm","bgm_memorize",v)}else Music.vol(v)},
+  ui(){const t=document.getElementById("musicTxt");if(t)t.textContent=this.on?"음악 끄기":"음악 켜기";document.getElementById("musicBox").classList.toggle("playing",this.on)}
+};
+const BGM_OF={palace:"bgm_royal",forest:"bgm_royal",mailbox:"bgm_royal",bluehouse:"bgm_royal",purple:"bgm_happy"};
+const AMB_OF={palace:null,forest:["sfx_birds",.3],mailbox:["sfx_birds",.2],bluehouse:["sfx_birds",.25],purple:null};
+const BGIMG={palace:"bg_palace",forest:"bg_forest",mailbox:"bg_mailbox",bluehouse:"bg_bluehouse",purple:"bg_purple"};
+Object.values(BGIMG).forEach(f=>{const i=new Image();i.src=`img/${f}.webp`});
+
+/* ---------- 배역 이름 ---------- */
+const ROLES=[["percy","퍼시 대왕"],["s1","신하 1"],["s2","신하 2"],["kid","꼬마"],["narr","해설"]];
+let castNames={};try{castNames=JSON.parse(localStorage.getItem("percyCast")||"{}")}catch(e){}
+const castPanel=document.getElementById("castPanel");
+castPanel.innerHTML=ROLES.map(([k,n])=>`<label>${n} <input data-k="${k}" placeholder="이름" value="${(castNames[k]||"").replace(/"/g,"&quot;")}"></label>`).join("");
+castPanel.addEventListener("input",e=>{const k=e.target.dataset.k;if(!k)return;castNames[k]=e.target.value;try{localStorage.setItem("percyCast",JSON.stringify(castNames))}catch(_){}render()});
+
+const S={cover:true,tab:"story",idx:{story:0,role:0},auto:true,hint:false,curBg:null};
+const $=id=>document.getElementById(id);
+function nameOf(k){return castNames[k]&&castNames[k].trim()}
+function render(){
+  const mode=S.tab;if(mode!=="story"&&mode!=="role")return;
+  const st=STEPS[S.idx[mode]],sc=SCENES[st.scene];
+  const bgKey=st.bg||sc.bg;
+  // 이 장면에서 앞서 bg가 바뀐 단계가 있으면 그 배경을 이어 씀
+  let effBg=bgKey;for(let j=S.idx[mode];j>=0&&STEPS[j].scene===st.scene;j--){if(STEPS[j].bg){effBg=STEPS[j].bg;break}}
+  if(S.curBg!==effBg){$("bg").innerHTML=`<img class="bgImg" src="img/${BGIMG[effBg]}.webp" alt="">`;S.curBg=effBg}
+  $("bg").classList.toggle("glass",effBg==="purple");
+  let moods=Object.assign({},sc.moods);for(let j=0;j<=S.idx[mode];j++){if(STEPS[j].scene===st.scene&&STEPS[j].moods)Object.assign(moods,STEPS[j].moods)}
+  $("actors").innerHTML=Object.entries(sc.cast).map(([k,c])=>{
+    const m=moods[k]||"normal";
+    const speaking=st.t==="line"&&st.who===k;
+    const tag=mode==="role"?(nameOf(k)||""):"";
+    return `<div class="actor pic${c.flip?" flip":""}${speaking?" speaking":""}" data-k="${k}" style="left:${c.x}%;--h:${HEIGHT[k]}%">${pic(k,m)}<div class="tag">${tag}</div></div>`;
+  }).join("");
+  const key=mode+S.idx[mode]+(S.cover?"c":""),entered=S.lastKey!==key,prevBg=S.lastBg;S.lastKey=key;S.lastBg=effBg;
+  const ov=$("overlay");ov.innerHTML="";
+  if(st.glass&&entered){const g=document.createElement("div");g.className="glint";ov.appendChild(g)}
+  if(st.t==="narr"){
+    const reader=mode==="role"&&nameOf("narr")?`<span class="reader">읽는 사람: ${nameOf("narr")}</span>`:"";
+    const d=document.createElement("div");d.className="narr";d.innerHTML=`<button type="button" id="narrRead">🔊 해설 듣기</button><span class="lab">해설</span>${st.ko}${reader}`;ov.appendChild(d);
+    $("narrRead").onclick=()=>say(st.v,st.ko,"ko-KR",.95);
+  }else{
+    const who=CH[st.who].ko+(mode==="role"&&nameOf(st.who)?` · ${nameOf(st.who)}`:"");
+    const b=document.createElement("div");b.className="bubble";
+    b.innerHTML=mode==="story"
+      ?`<div class="who">${who}</div><div class="en">${st.en}</div><div class="sub">${st.ko}</div>`
+      :`<div class="who">${who}</div><div class="ko">${st.ko}</div>${S.hint?`<div class="hint">${st.en}</div>`:""}`;
+    ov.appendChild(b);placeBubble(b,st);
+    if(entered&&!sfx("sfx_pop",.6))Music.pop();
+  }
+  $("cover").hidden=!(mode==="story"&&S.cover);
+  $("sceneChip").textContent=`장면 ${st.scene+1}. ${sc.title}`;
+  $("prevBtn").disabled=S.idx[mode]===0&&!(mode==="story"&&!S.cover);
+  const last=S.idx[mode]===STEPS.length-1;$("nextBtn").textContent=last?"끝 ✓":"다음 ▶";$("nextBtn").disabled=last;
+  $("progTxt").textContent=`${S.idx[mode]+1} / ${STEPS.length}`;
+  $("dots").innerHTML=SCENES.map((_,i)=>`<i class="${i<st.scene?"done":i===st.scene?"now":""}"></i>`).join("");
+  $("listenBtn").disabled=st.t!=="line";
+  const inCover=mode==="story"&&S.cover;
+  loop("bgm",mode==="story"?(inCover?"bgm_royal":BGM_OF[effBg]):null,.22);
+  const amb=inCover?null:AMB_OF[effBg];loop("amb",amb?amb[0]:null,amb?amb[1]:0);
+  if(!entered||inCover)return;
+  stopVoice();
+  if(st.glass)sfx("sfx_star",.8);
+  else if(S.lastScene!==undefined&&S.lastScene!==st.scene)sfx("sfx_page",.6);
+  S.lastScene=st.scene;
+  if(S.idx[mode]===STEPS.length-1)sfx("sfx_party",.7);
+  if(mode==="story"&&S.auto){
+    const myKey=key,delay=st.glass?1300:(prevBg!==effBg?800:380);
+    setTimeout(()=>{if(S.lastKey!==myKey)return;st.t==="line"?say(st.v,st.en):say(st.v,st.ko,"ko-KR",.95)},delay);
+  }
+}
+function placeBubble(b,st){
+  const stage=$("stage"),sr=stage.getBoundingClientRect();
+  const a=document.querySelector(`.actor[data-k="${st.who}"]`);if(!a)return;
+  const ar=a.getBoundingClientRect();
+  const cx=(ar.left+ar.right)/2-sr.left,top=ar.top-sr.top;
+  const bw=b.offsetWidth,gap=sr.width*.025;
+  let left=Math.max(sr.width*.015,Math.min(sr.width-bw-sr.width*.015,cx-bw/2));
+  b.style.left=left+"px";b.style.bottom=Math.min(sr.height-b.offsetHeight-sr.width*.01,(sr.height-top+gap))+"px";
+  b.style.setProperty("--tail",Math.max(24,Math.min(bw-24,cx-left))+"px");
+}
+function go(d){const m=S.tab;if(m!=="story"&&m!=="role")return;
+  if(m==="story"&&S.cover){if(d>0){S.cover=false;render()}return}
+  if(m==="story"&&d<0&&S.idx[m]===0){S.cover=true;render();return}
+  const n=S.idx[m]+d;if(n<0||n>=STEPS.length)return;stopVoice();S.idx[m]=n;render()}
+$("prevBtn").onclick=()=>go(-1);$("nextBtn").onclick=()=>go(1);
+$("restartBtn").onclick=()=>{S.idx[S.tab]=0;if(S.tab==="story")S.cover=true;render()};
+$("cover").onclick=()=>go(1);
+$("sndBtn").onclick=e=>{Snd.on=!Snd.on;e.currentTarget.setAttribute("aria-pressed",Snd.on);if(Snd.on)relaunch();else Object.keys(Snd.loops).forEach(k=>{const a=Snd.loops[k];if(a){a.pause();Snd.loops[k]=null}})};
+$("listenBtn").onclick=()=>{const st=STEPS[S.idx[S.tab]];if(st.t==="line")say(st.v,st.en)};
+$("autoBtn").onclick=e=>{S.auto=!S.auto;e.currentTarget.setAttribute("aria-pressed",S.auto)};
+$("hintBtn").onclick=e=>{S.hint=!S.hint;e.currentTarget.setAttribute("aria-pressed",S.hint);render()};
+$("castBtn").onclick=e=>{const on=castPanel.hidden;castPanel.hidden=!on;e.currentTarget.setAttribute("aria-pressed",on);render()};
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT")return;
+  if(S.tab==="story"||S.tab==="role"){
+    if(e.key==="ArrowRight"||e.key===" "){e.preventDefault();go(1)}
+    if(e.key==="ArrowLeft"){e.preventDefault();go(-1)}
+    if((e.key==="h"||e.key==="H")&&S.tab==="role")$("hintBtn").click();
+  }
+});
+window.addEventListener("resize",()=>{if(S.tab==="story"||S.tab==="role")render()});
+
+/* ---------- 탭 전환 ---------- */
+document.querySelectorAll(".tab[data-tab]").forEach(t=>t.onclick=()=>setTab(t.dataset.tab));
+function setTab(tab){
+  S.tab=tab;document.querySelectorAll(".tab[data-tab]").forEach(t=>t.setAttribute("aria-selected",t.dataset.tab===tab));
+  stopVoice();stopDrill();
+  $("stageView").hidden=!(tab==="story"||tab==="role");$("memoView").hidden=tab!=="memo";$("postView").hidden=tab!=="post";
+  const role=tab==="role";
+  $("hintBtn").hidden=!role;$("castBtn").hidden=!role;$("autoBtn").hidden=role;
+  $("listenBtn").innerHTML=role?"🔊 정답 듣기":"🔊 영어 듣기";
+  if(!role){castPanel.hidden=true;$("castBtn").setAttribute("aria-pressed",false)}
+  S.lastKey=null;S.lastBg=null;S.lastScene=undefined;
+  if(tab==="memo"){loop("amb",null);loop("bgm",null);MemoMusic.start()}
+  else{if(MemoMusic.on)MemoMusic.stop();if(tab==="post"){loop("amb",null);loop("bgm","bgm_happy",.2)}}
+  if(tab==="post"&&!$("p-color").hidden)drawColor();
+  if(tab==="story"||tab==="role")render();
+}
+
+/* ---------- 대사 외우기 ---------- */
+const BLANKS=["What [color] is it?","It’s [green].","What [color] is it?","It’s [red].","I [like] [purple]!","What [color] is it?","It’s [blue].","This is [for] you.","Oh, I [like] it! [Thank] you."];
+let LV=1,ROLE="all";
+function enHTML(i){
+  const en=LINES[i].en;
+  if(LV===1)return en;
+  if(LV===2)return BLANKS[i].replace(/\[(.+?)\]/g,'<span class="blank">$1</span>');
+  if(LV===3)return en.replace(/[A-Za-z’']+/g,w=>/^(I|It’s|Oh)$/.test(w)?w:w[0]+'<span style="letter-spacing:.15em;color:var(--muted)">'+"_".repeat(Math.max(1,w.replace(/[’']/,"").length-1))+"</span>");
+  return `<span class="hidden">누르면 잠깐 보여요</span>`;
+}
+$("roleSeg").innerHTML=[["all","모두"],...ROLES.filter(r=>r[0]!=="narr")].map(([k,n])=>`<button data-r="${k}" aria-pressed="${k==="all"}">${n}</button>`).join("");
+$("roleSeg").onclick=e=>{const b=e.target.closest("button");if(!b)return;ROLE=b.dataset.r;$("roleSeg").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));stopDrill();drawCards()};
+function drawCards(){
+  let html="",lastScene=-1;
+  LINES.forEach((st,i)=>{
+    if(ROLE!=="all"&&st.who!==ROLE)return;
+    if(st.scene!==lastScene){html+=`<div class="scHead">장면 ${st.scene+1}. ${SCENES[st.scene].title}</div>`;lastScene=st.scene}
+    let m=Object.assign({},SCENES[st.scene].moods);for(const x of STEPS){if(x.scene===st.scene&&x.i<=st.i&&x.moods)Object.assign(m,x.moods)}
+    html+=`<div class="card" data-i="${i}"><div class="av">${pic(st.who,m[st.who]||"normal")}</div>
+      <div style="min-width:0"><div class="who">${CH[st.who].ko} · <span class="ko" style="font-size:inherit">${st.ko}</span></div><div class="en" id="en-${i}">${enHTML(i)}</div></div>
+      <button class="play" type="button" aria-label="듣기" data-i="${i}">▶</button><div class="bar"></div></div>`;
+  });
+  $("cards").innerHTML=html;
+}
+$("cards").addEventListener("click",e=>{
+  const pb=e.target.closest(".play");if(pb){say(LINES[+pb.dataset.i].v,LINES[+pb.dataset.i].en);return}
+  const c=e.target.closest(".card");if(!c)return;const i=+c.dataset.i;
+  if(LV===4){const el=$("en-"+i);el.textContent=LINES[i].en;clearTimeout(c._t);c._t=setTimeout(()=>{el.innerHTML=enHTML(i)},2500)}
+  else if(LV===2){c.classList.add("peek");clearTimeout(c._t);c._t=setTimeout(()=>c.classList.remove("peek"),2500)}
+});
+$("levelSeg").onclick=e=>{const b=e.target.closest("button");if(!b)return;LV=+b.dataset.lv;
+  $("levelSeg").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));LINES.forEach((_,i)=>{const el=$("en-"+i);if(el)el.innerHTML=enHTML(i)})};
+$("musicBtn").onclick=()=>MemoMusic.toggle();
+$("vol").oninput=e=>MemoMusic.setVol(e.target.value/100);
+let drill=null;
+function stopDrill(){if(drill){drill.stop=true;drill=null}$("drillBtn").textContent="🗣️ 듣고 따라 말하기";document.querySelectorAll(".card").forEach(c=>{c.classList.remove("active");const b=c.querySelector(".bar");if(b){b.style.transition="none";b.style.width="0"}})}
+$("drillBtn").onclick=async()=>{
+  if(drill){stopDrill();return}
+  const me=drill={stop:false};$("drillBtn").textContent="■ 멈추기";
+  const cards=[...document.querySelectorAll(".card")];
+  for(const c of cards){if(me.stop)break;const i=+c.dataset.i;
+    cards.forEach(x=>x.classList.remove("active"));c.classList.add("active");c.scrollIntoView({block:"nearest",behavior:"smooth"});
+    for(let r=0;r<2&&!me.stop;r++){
+      await say(LINES[i].v,LINES[i].en);if(me.stop)break;
+      const wait=1800+LINES[i].en.length*70,bar=c.querySelector(".bar");
+      bar.style.transition="none";bar.style.width="0";void bar.offsetWidth;bar.style.transition=`width ${wait}ms linear`;bar.style.width="100%";
+      await new Promise(r=>setTimeout(r,wait));bar.style.transition="none";bar.style.width="0";
+    }
+  }
+  if(drill===me)stopDrill();
+};
+let tm=null;
+document.querySelectorAll("[data-min]").forEach(b=>b.onclick=()=>{
+  clearInterval(tm);let left=+b.dataset.min*60;const el=$("timer");el.classList.remove("end");
+  const show=()=>{el.textContent=String(Math.floor(left/60)).padStart(2,"0")+":"+String(left%60).padStart(2,"0")};show();
+  tm=setInterval(()=>{left--;show();if(left<=0){clearInterval(tm);el.classList.add("end");if(!sfx("sfx_timeup",.9))Music.chime();toast("외우기 시간 끝! 역할극 준비해요")}},1000);
+});
+function toast(msg){const t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
+
+/* ---------- 사후 활동 ---------- */
+$("postSeg").onclick=e=>{const b=e.target.closest("button");if(!b)return;$("postSeg").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+  ["quiz","color","eval"].forEach(p=>$("p-"+p).hidden=p!==b.dataset.p);if(b.dataset.p==="color")drawColor()};
+
+// 누가 말했을까?
+let Q={list:[],n:0,score:0,answered:false};
+function newQuiz(){const seen=new Set();const pool=LINES.filter(l=>{const k=l.who+l.en;if(seen.has(k))return false;seen.add(k);return true});Q.list=pool.sort(()=>Math.random()-.5);Q.n=0;Q.score=0;drawQ()}
+function drawQ(){
+  const box=$("p-quiz");
+  if(Q.n>=Q.list.length){box.innerHTML=`<h2>누가 말했을까?</h2><div class="quizQ"><div class="line">${Q.score} / ${Q.list.length}</div><div class="ko">${Q.score===Q.list.length?"모두 맞혔어요! 보라 왕국 대사 박사!":"잘했어요! 한 번 더 도전해 볼까요?"}</div><button class="btn main" id="qAgain">다시 하기</button></div>`;$("qAgain").onclick=newQuiz;return}
+  const q=Q.list[Q.n];Q.answered=false;
+  const face={percy:"happy",s1:"happy",s2:"happy",kid:"happy"};
+  box.innerHTML=`<h2>누가 말했을까?</h2><p class="lead">대사를 듣고, 이 말을 한 인물을 골라요.</p>
+  <div class="quizQ"><div class="line">“${q.en}”</div><button class="btn soft" id="qListen">🔊 듣기</button>
+  <div class="choices">${["percy","s1","s2","kid"].map(k=>`<button class="choice" data-k="${k}">${pic(k,face[k])}${CH[k].ko}</button>`).join("")}</div>
+  <div class="qfoot"><span>${Q.n+1} / ${Q.list.length}</span><span id="qMsg"></span><button class="btn main" id="qNext" hidden>다음 문제 ▶</button></div></div>`;
+  $("qListen").onclick=()=>say(q.v,q.en);
+  box.querySelectorAll(".choice").forEach(c=>c.onclick=()=>{
+    if(Q.answered)return;Q.answered=true;const ok=c.dataset.k===q.who;
+    c.classList.add(ok?"ok":"no");if(!ok)box.querySelector(`.choice[data-k="${q.who}"]`).classList.add("ok");
+    if(ok){Q.score++;if(!sfx("sfx_correct",.8))Music.chime()}else sfx("sfx_wrong",.8);
+    $("qMsg").textContent=ok?`딩동댕! “${q.ko}”`:`정답은 ${CH[q.who].ko}! “${q.ko}”`;$("qNext").hidden=false;
+  });
+  $("qNext").onclick=()=>{Q.n++;drawQ()};
+}
+
+// 좋아하는 색을 바꿔 봐요 (교과서 창의 활동)
+const COLORS=[
+ ["red","빨간색","#e0453a","hue-rotate(78deg) saturate(1.6) brightness(1.15)"],
+ ["orange","주황색","#f08a24","hue-rotate(102deg) saturate(1.8) brightness(1.45)"],
+ ["yellow","노란색","#f4cf2c","hue-rotate(130deg) saturate(1.8) brightness(2.1)"],
+ ["green","초록색","#3faa4f","hue-rotate(195deg) saturate(1.4) brightness(1.15)"],
+ ["blue","파란색","#3b74d6","hue-rotate(300deg) saturate(1.4) brightness(1.15)"],
+ ["pink","분홍색","#f28bbf","hue-rotate(40deg) saturate(.9) brightness(1.55)"],
+ ["brown","갈색","#8a5a34","hue-rotate(112deg) saturate(.8) brightness(.8)"],
+ ["white","흰색","#ffffff","grayscale(1) brightness(1.8) contrast(.8)"]
+];
+let C={c:1};
+function drawColor(){
+  const col=COLORS[C.c];
+  $("p-color").innerHTML=`<h2>좋아하는 색을 바꿔 봐요</h2><p class="lead">퍼시 대왕이 <b>보라색</b> 대신 다른 색을 좋아한다면? 색을 골라 이야기를 새롭게 꾸며요.</p>
+  <div class="giftWrap"><div>
+    <h3>① 퍼시 대왕이 좋아하는 색 고르기</h3>
+    <div class="colorGrid">${COLORS.map((x,i)=>`<button class="pick" data-c="${i}" aria-pressed="${i===C.c}"><span class="dot" style="background:${x[2]}"></span><span class="enw">${x[0]}</span>${x[1]}</button>`).join("")}</div>
+    <h3>② 바뀐 대사</h3>
+    <div class="lineList">
+      <div><b>퍼시 대왕</b><span class="en">What color is it?</span></div>
+      <div><b>신하 2</b><span class="en">It’s red.</span></div>
+      <div><b>퍼시 대왕</b><span class="en">I like <span class="hl">${col[0]}</span>!</span> <span style="color:var(--muted)">나는 ${col[1]}이 좋아!</span></div>
+    </div>
+  </div>
+  <div class="mini" id="mini"><div class="bg"><img class="bgImg" src="img/bg_mailbox.webp" alt=""></div>
+    <div class="story"><span class="swatch" style="background:${col[2]}"></span>${col[1]}을 좋아하는 퍼시 대왕</div>
+    <div class="actor pic" data-k="s2" style="left:22%;--h:34%">${pic("s2","sad")}</div>
+    <div class="actor pic" data-k="percy" style="left:55%;--h:52%">${pic("percy","grumpy",`filter:${col[3]} drop-shadow(0 .6cqw .5cqw rgba(40,20,60,.25))`)}</div>
+  </div></div>
+  <div class="ctrl" style="margin-top:12px"><button class="btn main" id="colorPlay">🔊 장면 듣기</button></div>`;
+  const mini=$("mini");
+  const b=document.createElement("div");b.className="bubble";b.innerHTML=`<div class="en">I like ${col[0]}!</div><div class="sub">나는 ${col[1]}이 좋아!</div>`;mini.appendChild(b);
+  const a=mini.querySelector('.actor[data-k="percy"]');
+  const place=()=>{const mr=mini.getBoundingClientRect(),ar=a.getBoundingClientRect(),bw=b.offsetWidth;if(!mr.width)return;
+    const cx=(ar.left+ar.right)/2-mr.left;let left=Math.max(6,Math.min(mr.width-bw-6,cx-bw/2));
+    b.style.left=left+"px";b.style.bottom=Math.min(mr.height-b.offsetHeight-4,(mr.height-(ar.top-mr.top)+8))+"px";b.style.setProperty("--tail",Math.max(20,Math.min(bw-20,cx-left))+"px")};
+  const im=a.querySelector("img");if(im.complete)place();else im.onload=place;
+  $("p-color").querySelectorAll("[data-c]").forEach(x=>x.onclick=()=>{C.c=+x.dataset.c;drawColor();if(!sfx("sfx_pop",.6))Music.pop()});
+  $("colorPlay").onclick=async()=>{await say("v_percy_what","What color is it?");await new Promise(r=>setTimeout(r,200));await say("v_s2_red","It’s red.");await new Promise(r=>setTimeout(r,200));await say("v_percy_like_"+col[0],`I like ${col[0]}!`)};
+}
+
+// 모둠 평가
+const CRIT=["영어 표현","자신감","협동심"];let EV={};
+function drawEval(){
+  let rows="";
+  for(let g=1;g<=6;g++){
+    let tot=0;const cells=CRIT.map((_,c)=>{const v=EV[g+"-"+c]||0;tot+=v;return `<td><span class="stars">${[1,2,3].map(s=>`<button type="button" class="${s<=v?"on":""}" data-g="${g}" data-c="${c}" data-s="${s}" aria-label="${g}모둠 ${CRIT[c]} ${s}점">★</button>`).join("")}</span></td>`}).join("");
+    rows+=`<tr><td>${g}모둠</td>${cells}<td class="total">${tot}</td></tr>`;
+  }
+  $("p-eval").innerHTML=`<h2>우리 모둠에게 주고 싶은 점수는?</h2><p class="lead">역할극을 마친 모둠의 별을 함께 눌러요. 같은 별을 한 번 더 누르면 지워져요.</p>
+  <div class="tableWrap"><table class="evalT"><thead><tr><th>모둠</th>${CRIT.map(c=>`<th>${c}</th>`).join("")}<th>합계</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  $("p-eval").querySelectorAll(".stars button").forEach(b=>b.onclick=()=>{const k=b.dataset.g+"-"+b.dataset.c,s=+b.dataset.s;EV[k]=EV[k]===s?0:s;if(!(EV[k]&&sfx("sfx_star",.7)))Music.pop();drawEval()});
+}
+
+/* ---------- 학생 화면 / 교사용 바로가기 ---------- */
+const STUDENT=new URLSearchParams(location.search).has("s");
+if(STUDENT){document.body.classList.add("student");document.title="보라 대왕 퍼시 · 학생용"}
+$("teacherBtn").onclick=()=>{
+  const bg=document.createElement("div");bg.className="lockBg";
+  bg.innerHTML=`<div class="lockBox"><h3>🔒 교사용 화면</h3><div style="color:var(--muted)">비밀번호를 넣어 주세요</div><input type="password" inputmode="numeric" maxlength="8" id="pw" autocomplete="off"><div class="err" id="pwErr"></div><div class="row"><button class="btn soft" id="pwNo">닫기</button><button class="btn main" id="pwOk">들어가기</button></div></div>`;
+  document.body.appendChild(bg);const pw=$("pw");pw.focus();
+  const ok=()=>{if(pw.value==="0634"){location.href=location.pathname}else{$("pwErr").textContent="비밀번호가 달라요";pw.value="";pw.focus()}};
+  $("pwOk").onclick=ok;pw.onkeydown=e=>{if(e.key==="Enter")ok();if(e.key==="Escape")bg.remove()};$("pwNo").onclick=()=>bg.remove();
+};
+
+/* ---------- 시작 ---------- */
+drawCards();newQuiz();drawEval();
+if(STUDENT)setTab("memo");else render();
+document.fonts&&document.fonts.ready.then(()=>{if(S.tab==="story"||S.tab==="role")render()});
+</script>
+
+</body>
+</html>
